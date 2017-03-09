@@ -8,6 +8,11 @@
 #include <QHBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QApplication>
+#include <QProcess>
+#include <iostream> // Inclut la bibliothèque iostream (affichage de texte)
+
+using namespace std; // Indique quel espace de noms on va utiliser
 
 //GoogleC++ Style Guide : https://google.github.io/styleguide/cppguide.html
 
@@ -28,6 +33,7 @@ private slots:
 
     void on_restoreButton_clicked();
 
+    void exit();
 private:
     Ui::MainWindow *ui;
 

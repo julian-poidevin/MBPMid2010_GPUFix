@@ -15,6 +15,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::exit()
+{
+    close();
+    qApp->quit();
+}
+
 void MainWindow::on_patchButton_clicked()
 {
     //Display Warning Message
@@ -47,24 +53,40 @@ void MainWindow::on_restoreButton_clicked()
 
 void MainWindow::init()
 {
+
     ui->patchButton->setEnabled(false);
     ui->restoreButton->setEnabled(false);
 
     //Search for compatibility
-    isCompatibleVersion(getMBPModelVersion());
-
-    ui->patchButton->setEnabled(true);
-    ui->restoreButton->setEnabled(true);
+    if(isCompatibleVersion(getMBPModelVersion()))
+    {
+        ui->patchButton->setEnabled(true);
+        ui->restoreButton->setEnabled(true);
+    }
+    else
+    {
+        QMessageBox *QuitWindow = new QMessageBox;
+        QuitWindow->information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
+        // TODO: Find a way to force close the app
+    }
 }
 
 QString MainWindow::getMBPModelVersion()
 {
-    /* Execute Following Command Line and return result */
-    //sysctl -n hw.model
-    //or
-    //ioreg -l | awk '/product-name/ { split($0, line, "\""); printf("%s\n", line[4]); }'
-
     QString MBPModelVersion;
+    QProcess process;
+
+    //Execute commande line
+    process.start("sysctl -n hw.model");
+
+    //Wait forever until finished
+    process.waitForFinished(-1);
+
+    //Get command line output
+    MBPModelVersion = process.readAllStandardOutput();
+
+    //Remove carriage return ("\n") from string
+    MBPModelVersion = MBPModelVersion.simplified();
 
     return MBPModelVersion;
 }
@@ -83,15 +105,28 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
 {
     //Compare version with compatible versions of MBPs
     bool isCompatibleVersion;
+    QString MBPModelVersion;
+
+    MBPModelVersion = getMBPModelVersion();
+
+    //TODO : Search in a list
+    if(MBPModelVersion == "MacBookPro6,2")
+    {
+        std::cout<<"Succes"<<std::endl;
+        isCompatibleVersion = true;
+    }
+    else
+    {
+        std::cout<<"Fail"<<std::endl;
+        isCompatibleVersion = false;
+    }
 
     return isCompatibleVersion;
-
 }
 
 void MainWindow::backupKernelExtension()
 {
     //Save File to current location adding .bak extension
-
 }
 
 void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
