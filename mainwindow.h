@@ -31,6 +31,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    void init();
     QString getMBPModelVersion(void);
     int searchKernelExtensionFile(QFile* kernelFile);
     bool isCompatibleVersion(QString modelVersion);

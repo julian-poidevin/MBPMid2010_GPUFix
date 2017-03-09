@@ -7,11 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(ui->patchButton);
-    layout->addWidget(ui->restoreButton);
-
-    MainWindow::setLayout(layout);
+    init();
 }
 
 MainWindow::~MainWindow()
@@ -22,18 +18,43 @@ MainWindow::~MainWindow()
 void MainWindow::on_patchButton_clicked()
 {
     //Display Warning Message
-    int answer = QMessageBox::question(this, "Warning", "Are you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
+    int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
 
     if (answer == QMessageBox::Yes)
     {
 
     }
-
+    else
+    {
+        return;
+    }
 }
 
 void MainWindow::on_restoreButton_clicked()
 {
+    //Display Warning Message
+    int answer = QMessageBox::question(this, "Warning", "This will restore the old configuration.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
 
+    if (answer == QMessageBox::Yes)
+    {
+
+    }
+    else
+    {
+        return;
+    }
+}
+
+void MainWindow::init()
+{
+    ui->patchButton->setEnabled(false);
+    ui->restoreButton->setEnabled(false);
+
+    //Search for compatibility
+    isCompatibleVersion(getMBPModelVersion());
+
+    ui->patchButton->setEnabled(true);
+    ui->restoreButton->setEnabled(true);
 }
 
 QString MainWindow::getMBPModelVersion()
@@ -42,6 +63,10 @@ QString MainWindow::getMBPModelVersion()
     //sysctl -n hw.model
     //or
     //ioreg -l | awk '/product-name/ { split($0, line, "\""); printf("%s\n", line[4]); }'
+
+    QString MBPModelVersion;
+
+    return MBPModelVersion;
 }
 
 int MainWindow::searchKernelExtensionFile(QFile *kernelFile)
@@ -49,11 +74,17 @@ int MainWindow::searchKernelExtensionFile(QFile *kernelFile)
     //Parse system directory searching for AppleGraphicsPowerManagement.kext file
     //See here : https://developer.apple.com/library/content/documentation/Darwin/Conceptual/KEXTConcept/Articles/command_line_tools.html
     //"Locate Kext"
+    int FileFound;
+
+    return FileFound;
 }
 
 bool MainWindow::isCompatibleVersion(QString modelVersion)
 {
     //Compare version with compatible versions of MBPs
+    bool isCompatibleVersion;
+
+    return isCompatibleVersion;
 
 }
 
@@ -76,12 +107,17 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     //kextload
 
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
+    int Status;
 
+    return Status;
 }
 
 int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
 {
     //Restore.bak extension
+    int Status;
+
+    return Status;
 }
 
 
