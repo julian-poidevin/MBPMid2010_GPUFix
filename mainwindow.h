@@ -47,7 +47,7 @@ private:
 
     QString getMBPModelVersion(void);
     bool isCompatibleVersion(QString modelVersion);
-    bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile);
+    bool searchKernelExtensionFile(QFile* kernelExtensionFile);
     void backupKernelExtension(void);
     void patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);

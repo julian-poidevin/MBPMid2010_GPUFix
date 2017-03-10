@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#define TEST
+//#define REAL
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -28,7 +31,7 @@ void MainWindow::on_patchButton_clicked()
 
         if (answer == QMessageBox::Yes)
         {
-
+            patchKernelExtensionFile(&kernelFile);
         }
         else
         {
@@ -99,15 +102,22 @@ QString MainWindow::getMBPModelVersion()
 bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
 {
     bool isFileFound;
-    QDir appPath("../");
+
+#ifdef TEST
+    QDir kextPath("/Users/Julian/Documents/Dev/Projects/MBPMid2010_GPUFix/");
+#endif
+#ifdef REAL
+    QDir kextPath("/System/Library/Extensions/AppleGraphicsPowerManagement.kext/");
+#endif
+
     QStringList listOfFiles;
 
     //Print Current app directory
-    qDebug() << "Current Dir :" <<appPath.absolutePath();
+    qDebug() << "Current Dir :" <<kextPath.absolutePath();
 
     //Recursively search for "Info.plist" file in appPath
-    QDirIterator it(appPath.absolutePath(),
-                    QStringList() << "*.plist",
+    QDirIterator it(kextPath.absolutePath(),
+                    QStringList() << "Info.plist",
                     QDir::NoSymLinks | QDir::Files,
                     QDirIterator::Subdirectories);
 
@@ -124,6 +134,8 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
         }
     }
 
+    qDebug() << listOfFiles;
+
     if(listOfFiles.length() <= 1 && listOfFiles.length() > 0)
     {
         //qDebug() << "Moins de 1";
@@ -136,18 +148,19 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
         isFileFound = false;
     }
 
-    //Start search manuallyand only allow loading of the perfect named file (or kext)
+    //Start search manually and only allow loading of the perfect named file (or kext)
     if(!isFileFound)
     {
         QMessageBox::information(this,"File not found","Any corresponding file was found, please search for the file");
 
+        //TODO : FileDialog won't let user brown into .kext files Contents
         QString dir = QFileDialog::getOpenFileName(this, tr("Open Info.plist file"),
-                                                   "Info.plist",
+                                                   "/System/Library/Extensions/AppleGraphicsPowerManagement.kext/",
                                                    "Property List Files (Info.plist)");
 
         if(!(dir.isNull()))
         {
-            kernelExtensionFile->setFileName(dir);
+            //kernelExtensionFile->setFileName(dir);
             isFileFound = true;
         }
         else
@@ -190,6 +203,13 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     //Modify Kernel Extension File to add fix explained here :
     //https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/
 
+    qDebug() << "File Name" <<kernelFile->fileName();
+
+    //Save original file in kernelExtension file folder
+    QFile::copy(kernelFile->fileName(), kernelFile->fileName() + ".bak");
+
+    //Copy file in tmp dir for patch
+    QFile::copy(kernelFile->fileName(), "/tmp/PatchedInfo.plist");
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)
@@ -207,6 +227,8 @@ int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
 {
     //Restore.bak extension
     int Status;
+
+    //QFile::copy(kernelFile->fileName()  + ".bak", kernelFile->fileName());
 
     return Status;
 }
