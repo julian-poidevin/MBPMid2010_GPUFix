@@ -10,7 +10,12 @@
 #include <QTextStream>
 #include <QApplication>
 #include <QProcess>
-#include <iostream> // Inclut la bibliothèque iostream (affichage de texte)
+#include <iostream>
+#include <QDir>
+#include <QDebug>
+#include <QDirIterator>
+#include <QStack>
+#include <QFileDialog>
 
 using namespace std; // Indique quel espace de noms on va utiliser
 
@@ -38,9 +43,11 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    QFile kernelFile;
+
     QString getMBPModelVersion(void);
-    int searchKernelExtensionFile(QFile* kernelFile);
     bool isCompatibleVersion(QString modelVersion);
+    bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile);
     void backupKernelExtension(void);
     void patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);

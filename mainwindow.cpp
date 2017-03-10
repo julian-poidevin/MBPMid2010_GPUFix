@@ -21,12 +21,19 @@ void MainWindow::exit()
 
 void MainWindow::on_patchButton_clicked()
 {
-    //Display Warning Message
-    int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
-
-    if (answer == QMessageBox::Yes)
+    if(searchKernelExtensionFile(&kernelFile))
     {
+        //Display Warning Message
+        int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
 
+        if (answer == QMessageBox::Yes)
+        {
+
+        }
+        else
+        {
+            return;
+        }
     }
     else
     {
@@ -87,14 +94,69 @@ QString MainWindow::getMBPModelVersion()
     return MBPModelVersion;
 }
 
-int MainWindow::searchKernelExtensionFile(QFile *kernelFile)
-{
-    //Parse system directory searching for AppleGraphicsPowerManagement.kext file
-    //See here : https://developer.apple.com/library/content/documentation/Darwin/Conceptual/KEXTConcept/Articles/command_line_tools.html
-    //"Locate Kext"
-    int FileFound;
 
-    return FileFound;
+//Parse system directory searching for AppleGraphicsPowerManagement.kext file
+bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
+{
+    bool isFileFound;
+    QDir appPath("../");
+    QStringList listOfFiles;
+
+    //Print Current app directory
+    qDebug() << "Current Dir :" <<appPath.absolutePath();
+
+    //Recursively search for "Info.plist" file in appPath
+    QDirIterator it(appPath.absolutePath(),
+                    QStringList() << "*.plist",
+                    QDir::NoSymLinks | QDir::Files,
+                    QDirIterator::Subdirectories);
+
+
+    //Check if the file was found
+    if(it.hasNext())
+    {
+        //Print files found
+        qDebug () << "Files found :";
+        while(it.hasNext())
+        {
+            it.next();
+            listOfFiles.push_back(it.filePath());
+        }
+    }
+
+    if(listOfFiles.length() <= 1 && listOfFiles.length() > 0)
+    {
+        //qDebug() << "Moins de 1";
+        kernelExtensionFile->setFileName(listOfFiles.at(0));
+        isFileFound = true;
+    }
+    else
+    {
+        //qDebug () << "No file was found...";
+        isFileFound = false;
+    }
+
+    //Start search manuallyand only allow loading of the perfect named file (or kext)
+    if(!isFileFound)
+    {
+        QMessageBox::information(this,"File not found","Any corresponding file was found, please search for the file");
+
+        QString dir = QFileDialog::getOpenFileName(this, tr("Open Info.plist file"),
+                                                   "Info.plist",
+                                                   "Property List Files (Info.plist)");
+
+        if(!(dir.isNull()))
+        {
+            kernelExtensionFile->setFileName(dir);
+            isFileFound = true;
+        }
+        else
+        {
+            isFileFound = false;
+        }
+    }
+
+    return isFileFound;
 }
 
 bool MainWindow::isCompatibleVersion(QString modelVersion)
@@ -108,12 +170,10 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
     //TODO : Search in a list
     if(MBPModelVersion == "MacBookPro6,2")
     {
-        std::cout<<"Succes"<<std::endl;
         isCompatibleVersion = true;
     }
     else
     {
-        std::cout<<"Fail"<<std::endl;
         isCompatibleVersion = false;
     }
 
