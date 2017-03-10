@@ -7,7 +7,13 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     MainWindow ui;
 
-    ui.show();
-
-    return app.exec();
+    if(ui.init())
+    {
+        ui.show();
+        return app.exec();
+    }
+    else
+    {
+        return 0;
+    }
 }

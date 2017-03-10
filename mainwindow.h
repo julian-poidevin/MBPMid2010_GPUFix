@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    bool init();
 
 private slots:
     void on_patchButton_clicked();
@@ -37,7 +38,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    void init();
     QString getMBPModelVersion(void);
     int searchKernelExtensionFile(QFile* kernelFile);
     bool isCompatibleVersion(QString modelVersion);

@@ -6,8 +6,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    init();
 }
 
 MainWindow::~MainWindow()
@@ -51,24 +49,22 @@ void MainWindow::on_restoreButton_clicked()
     }
 }
 
-void MainWindow::init()
+bool MainWindow::init()
 {
-
-    ui->patchButton->setEnabled(false);
-    ui->restoreButton->setEnabled(false);
+    bool isInitOk = true;
 
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
-        ui->patchButton->setEnabled(true);
-        ui->restoreButton->setEnabled(true);
+        isInitOk = true;
     }
     else
     {
-        QMessageBox *QuitWindow = new QMessageBox;
-        QuitWindow->information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
-        // TODO: Find a way to force close the app
+        QMessageBox::information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
+        isInitOk = false;
     }
+
+    return isInitOk;
 }
 
 QString MainWindow::getMBPModelVersion()
