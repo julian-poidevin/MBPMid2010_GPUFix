@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define VERSION "0.1"
+#define APP_NAME "MBPMid2010-GPU-Fix"
+
 #include <QMainWindow>
 #include <QWidget>
 #include <QPushButton>
@@ -16,6 +19,8 @@
 #include <QDirIterator>
 #include <QStack>
 #include <QFileDialog>
+#include <QSettings>
+#include <QList>
 
 using namespace std; // Indique quel espace de noms on va utiliser
 
@@ -48,7 +53,7 @@ private:
     QString getMBPModelVersion(void);
     bool isCompatibleVersion(QString modelVersion);
     bool searchKernelExtensionFile(QFile* kernelExtensionFile);
-    void backupKernelExtension(void);
+    void backupOldKernelExtension(void);
     void patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);
     int restoreOldKernelExtension(QFile* kernelFile);

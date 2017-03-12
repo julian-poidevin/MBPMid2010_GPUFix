@@ -63,6 +63,8 @@ bool MainWindow::init()
 {
     bool isInitOk = true;
 
+    MainWindow::setWindowTitle (APP_NAME);
+
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
@@ -121,12 +123,9 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
                     QDir::NoSymLinks | QDir::Files,
                     QDirIterator::Subdirectories);
 
-
     //Check if the file was found
     if(it.hasNext())
     {
-        //Print files found
-        qDebug () << "Files found :";
         while(it.hasNext())
         {
             it.next();
@@ -134,7 +133,8 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
         }
     }
 
-    qDebug() << listOfFiles;
+    //Print files found
+    qDebug() << "Files found :"<< listOfFiles;
 
     if(listOfFiles.length() <= 1 && listOfFiles.length() > 0)
     {
@@ -157,7 +157,6 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
         QString dir = QFileDialog::getOpenFileName(this, tr("Open Info.plist file"),
                                                    "/System/Library/Extensions/AppleGraphicsPowerManagement.kext/",
                                                    "Property List Files (Info.plist)");
-
         if(!(dir.isNull()))
         {
             //kernelExtensionFile->setFileName(dir);
@@ -176,12 +175,9 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
 {
     //Compare version with compatible versions of MBPs
     bool isCompatibleVersion;
-    QString MBPModelVersion;
-
-    MBPModelVersion = getMBPModelVersion();
 
     //TODO : Search in a list
-    if(MBPModelVersion == "MacBookPro6,2")
+    if(modelVersion == "MacBookPro6,2")
     {
         isCompatibleVersion = true;
     }
@@ -193,23 +189,49 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
     return isCompatibleVersion;
 }
 
-void MainWindow::backupKernelExtension()
+void MainWindow::backupOldKernelExtension()
 {
     //Save File to current location adding .bak extension
+    qDebug() << "File Name" << kernelFile.fileName();
+
+    //Save original file in kernelExtension file folder
+    QFile::copy(kernelFile.fileName(), kernelFile.fileName() + ".bak");
 }
 
 void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 {
     //Modify Kernel Extension File to add fix explained here :
     //https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/
+    //Use QSettings ? : http://doc.qt.io/qt-5/qsettings.html
+    //https://openclassrooms.com/courses/enregistrer-vos-options-avec-qsettings
+    //http://stackoverflow.com/questions/20240511/qsettings-mac-and-plist-files
+    //https://forum.qt.io/topic/37247/qsettings-with-systemscope-not-saving-plist-file-in-os-x-mavericks/6
 
-    qDebug() << "File Name" <<kernelFile->fileName();
-
-    //Save original file in kernelExtension file folder
-    QFile::copy(kernelFile->fileName(), kernelFile->fileName() + ".bak");
+    backupOldKernelExtension();
 
     //Copy file in tmp dir for patch
     QFile::copy(kernelFile->fileName(), "/tmp/PatchedInfo.plist");
+
+    //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
+    QSettings settings("/tmp/PatchedInfo.plist", QSettings::NativeFormat);
+
+    //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
+
+    //Check if kernelFile is Writable
+    if(!settings.isWritable())
+    {
+        //TODO : handle not writable file
+        return;
+    }
+
+    if(settings.contains("LogControl"))
+    {
+        qDebug() << "Contains Log Control";
+    }
+    else
+    {
+        qDebug() << "Does not contains Log Control";
+    }
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)
@@ -218,7 +240,7 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     //kextload
 
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
-    int Status;
+    int Status = 0;
 
     return Status;
 }
@@ -226,11 +248,9 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
 int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
 {
     //Restore.bak extension
-    int Status;
+    int Status = 0;
 
     //QFile::copy(kernelFile->fileName()  + ".bak", kernelFile->fileName());
 
     return Status;
 }
-
-
