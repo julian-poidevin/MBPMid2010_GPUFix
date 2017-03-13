@@ -4,8 +4,8 @@
 #define TEST
 //#define REAL
 
-#define WINDOWS
-//#define MAC
+//#define WINDOWS
+#define MAC
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -244,48 +244,91 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 
     QXmlStreamReader xmlReader(&tmpFile);
 
-    while(!xmlReader.atEnd() && !xmlReader.hasError())
-    {
-        QXmlStreamReader::TokenType token = xmlReader.readNext();
-        if(token == QXmlStreamReader::StartElement)
-        {
-            //qDebug() << xmlReader.name();
+    if (xmlReader.readNextStartElement()) {
+        if (xmlReader.name() == "plist"){
 
-            if(xmlReader.name().compare("key",Qt::CaseInsensitive) == 0)
+            while(xmlReader.readNextStartElement())
             {
-                qDebug() << "Found IOKitPersonalities";
-            }
+                if(xmlReader.name() == "dict")
+                {
+                    while(xmlReader.readNextStartElement())
+                    {
+                        if(xmlReader.name() == "key")
+                        {
+                            //qDebug() << xmlReader.readElementText();
+                            if(xmlReader.readElementText() == "AGPM")
+                            {
+                                while(xmlReader.readNextStartElement())
+                                {
+                                    if(xmlReader.name() == "dict")
+                                    {
+                                        while(xmlReader.readNextStartElement())
+                                        {
+                                            xmlReader.readNext();
+                                            xmlReader.readNext();
 
-            if(xmlReader.name().compare("key", Qt::CaseInsensitive) == 0)
-            {
-               // qDebug() << "Found IOKitPersonalities";
+                                            if(xmlReader.name() == "key")
+                                            {
+                                                qDebug() << xmlReader.readElementText();
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        }
+
+                    }
+                }
+                else
+                {
+                    xmlReader.skipCurrentElement();
+                }
             }
         }
-
-        //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
-        //QSettings settings(PATCHED_FILE_PATH, QSettings::NativeFormat);
-
-
-        //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
-        //qDebug() << settings.value("IOKitPersonalities");
-        //qDebug() << settings.allKeys();
-
-        //Check if kernelFile is Writable
-        //if(!settings.isWritable())
-        //{
-        //    //TODO : handle not writable file
-        //    return;
-        //}
-
-        //if(settings.contains("LogControl"))
-        //{
-        //    qDebug() << "Contains Log Control";
-        //}
-        //else
-        //{
-        //    qDebug() << "Does not contains Log Control";
-        //}
     }
+
+
+
+    //    while(!xmlReader.atEnd() && !xmlReader.hasError())
+    //    {
+    //        QXmlStreamReader::TokenType token = xmlReader.readNext();
+    //        if(token == QXmlStreamReader::StartElement)
+    //        {
+    //            //qDebug() << xmlReader.name();
+
+    //            if(xmlReader.name().compare(static_cast<QString>("key"),Qt::CaseInsensitive) == 0)
+    //            {
+    //                qDebug() << "Found IOKitPersonalities";
+    //            }
+    //        }
+    //    }
+
+    //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
+    //QSettings settings(PATCHED_FILE_PATH, QSettings::NativeFormat);
+
+
+    //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
+    //qDebug() << settings.value("IOKitPersonalities");
+    //qDebug() << settings.allKeys();
+
+    //Check if kernelFile is Writable
+    //if(!settings.isWritable())
+    //{
+    //    //TODO : handle not writable file
+    //    return;
+    //}
+
+    //if(settings.contains("LogControl"))
+    //{
+    //    qDebug() << "Contains Log Control";
+    //}
+    //else
+    //{
+    //    qDebug() << "Does not contains Log Control";
+    //}
+
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)
