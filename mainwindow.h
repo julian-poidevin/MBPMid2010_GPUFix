@@ -5,8 +5,7 @@
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
-#include <QWidget>
-#include <QPushButton>
+//#include <QWidget>
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QFile>
@@ -21,6 +20,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QList>
+#include <QtXml>
 
 using namespace std; // Indique quel espace de noms on va utiliser
 

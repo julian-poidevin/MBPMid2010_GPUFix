@@ -4,6 +4,9 @@
 #define TEST
 //#define REAL
 
+#define WINDOWS
+//#define MAC
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -106,7 +109,12 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
     bool isFileFound;
 
 #ifdef TEST
+#ifdef MAC
     QDir kextPath("/Users/Julian/Documents/Dev/Projects/MBPMid2010_GPUFix/");
+#endif
+#ifdef WINDOWS
+    QDir kextPath("C:/Users/jpoidevin/Desktop/Documents Pro/03 - Dev Temp/MBPMid2010_GPUFix/MBPMid2010_GPUFix/");
+#endif
 #endif
 #ifdef REAL
     QDir kextPath("/System/Library/Extensions/AppleGraphicsPowerManagement.kext/");
@@ -176,6 +184,8 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
     //Compare version with compatible versions of MBPs
     bool isCompatibleVersion;
 
+#ifdef MAC
+
     //TODO : Search in a list
     if(modelVersion == "MacBookPro6,2")
     {
@@ -186,13 +196,18 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
         isCompatibleVersion = false;
     }
 
+#endif
+#ifdef WINDOWS
+    isCompatibleVersion = true;
+#endif
+
     return isCompatibleVersion;
 }
 
 void MainWindow::backupOldKernelExtension()
 {
     //Save File to current location adding .bak extension
-    qDebug() << "File Name" << kernelFile.fileName();
+    //qDebug() << "File Name" << kernelFile.fileName();
 
     //Save original file in kernelExtension file folder
     QFile::copy(kernelFile.fileName(), kernelFile.fileName() + ".bak");
@@ -209,28 +224,67 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 
     backupOldKernelExtension();
 
+#ifdef MAC
+#define PATCHED_FILE_PATH "/tmp/PatchedInfo.plist"
+#endif
+#ifdef WINDOWS
+#define PATCHED_FILE_PATH "C:/temp/PatchedInfo.plist"
+#endif
+
     //Copy file in tmp dir for patch
-    QFile::copy(kernelFile->fileName(), "/tmp/PatchedInfo.plist");
+    QFile::copy(kernelFile->fileName(), PATCHED_FILE_PATH);
 
-    //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
-    QSettings settings("/tmp/PatchedInfo.plist", QSettings::NativeFormat);
+    QFile tmpFile(PATCHED_FILE_PATH);
 
-    //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
-
-    //Check if kernelFile is Writable
-    if(!settings.isWritable())
+    if(!tmpFile.open(QIODevice::ReadWrite | QIODevice::Text))
     {
-        //TODO : handle not writable file
+        qDebug() << "Could not open tmp File";
         return;
     }
 
-    if(settings.contains("LogControl"))
+    QXmlStreamReader xmlReader(&tmpFile);
+
+    while(!xmlReader.atEnd() && !xmlReader.hasError())
     {
-        qDebug() << "Contains Log Control";
-    }
-    else
-    {
-        qDebug() << "Does not contains Log Control";
+        QXmlStreamReader::TokenType token = xmlReader.readNext();
+        if(token == QXmlStreamReader::StartElement)
+        {
+            //qDebug() << xmlReader.name();
+
+            if(xmlReader.name().compare("key",Qt::CaseInsensitive) == 0)
+            {
+                qDebug() << "Found IOKitPersonalities";
+            }
+
+            if(xmlReader.name().compare("key", Qt::CaseInsensitive) == 0)
+            {
+               // qDebug() << "Found IOKitPersonalities";
+            }
+        }
+
+        //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
+        //QSettings settings(PATCHED_FILE_PATH, QSettings::NativeFormat);
+
+
+        //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
+        //qDebug() << settings.value("IOKitPersonalities");
+        //qDebug() << settings.allKeys();
+
+        //Check if kernelFile is Writable
+        //if(!settings.isWritable())
+        //{
+        //    //TODO : handle not writable file
+        //    return;
+        //}
+
+        //if(settings.contains("LogControl"))
+        //{
+        //    qDebug() << "Contains Log Control";
+        //}
+        //else
+        //{
+        //    qDebug() << "Does not contains Log Control";
+        //}
     }
 }
 
