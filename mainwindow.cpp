@@ -271,7 +271,24 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     qDebug() << "BoostPState" << BoostPState.tagName() << BoostPState.text();
 
     QDomElement BoostPStateArray = BoostPState.nextSiblingElement("array");
-    qDebug() << "BoostPStateArray" << BoostPStateArray.tagName() << BoostPStateArray.text();
+    qDebug() << "BoostPStateArray" << BoostPStateArray.tagName() << BoostPStateArray.text() << BoostPStateArray.nodeName();
+
+    QDomElement BoostPStateArrayInteger = BoostPStateArray.firstChildElement("integer");
+    qDebug() << "BoostPStateArrayInteger" << BoostPStateArrayInteger.tagName() << BoostPStateArrayInteger.text() << BoostPStateArrayInteger.nodeName();
+
+    //Finally managing to change node value
+    //TODO : Create function with loop
+    BoostPStateArrayInteger.firstChild().setNodeValue("tatounet");
+    BoostPStateArrayInteger.nextSibling().firstChild().setNodeValue("tatounet2");
+    BoostPStateArrayInteger.nextSibling().nextSibling().firstChild().setNodeValue("tatounet3");
+    BoostPStateArrayInteger.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue("tatounet4");
+
+    // Write changes to same file
+    tmpFile.resize(0);
+    QTextStream stream;
+    stream.setDevice(&tmpFile);
+    xmlBOM.save(stream, 4);
+
 
     tmpFile.close();
 }
