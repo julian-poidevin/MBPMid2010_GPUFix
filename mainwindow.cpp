@@ -30,9 +30,11 @@ void MainWindow::on_patchButton_clicked()
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
-        int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
+        //TODO : Uncomment
+        //int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
 
-        if (answer == QMessageBox::Yes)
+        //if (answer == QMessageBox::Yes)
+        if(1)
         {
             patchKernelExtensionFile(&kernelFile);
         }
@@ -231,6 +233,13 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 #define PATCHED_FILE_PATH "C:/temp/PatchedInfo.plist"
 #endif
 
+
+    //Remove file if already exists
+    if (QFile::exists(PATCHED_FILE_PATH))
+    {
+        QFile::remove(PATCHED_FILE_PATH);
+    }
+
     //Copy file in tmp dir for patch
     QFile::copy(kernelFile->fileName(), PATCHED_FILE_PATH);
 
@@ -242,99 +251,37 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         return;
     }
 
-    QXmlStreamReader xmlReader(&tmpFile);
+    //The QDomDocument class represents an XML document.
+    QDomDocument xmlBOM;
 
-    if (xmlReader.readNextStartElement()) {
-        if (xmlReader.name() == "plist"){
+    // Set data into the QDomDocument before processing
+    xmlBOM.setContent(&tmpFile);
 
-            while(xmlReader.readNextStartElement())
-            {
-                if(xmlReader.name() == "dict")
-                {
-                    while(xmlReader.readNextStartElement())
-                    {
-                        if(xmlReader.name() == "key")
-                        {
-                            //qDebug() << xmlReader.readElementText();
-                            if(xmlReader.readElementText() == "AGPM")
-                            {
-                                while(xmlReader.readNextStartElement())
-                                {
-                                    if(xmlReader.name() == "dict")
-                                    {
-                                        while(xmlReader.readNextStartElement())
-                                        {
-                                            xmlReader.readNext();
-                                            xmlReader.readNext();
+    // Extract the root markup
+    QDomElement root = xmlBOM.firstChildElement("plist");
 
-                                            if(xmlReader.name() == "key")
-                                            {
-                                                qDebug() << xmlReader.readElementText();
-                                            }
-                                        }
-                                    }
-                                }
+    //Parse tree
+    QDomElement MacBookPro62 = findElementChild(root,"MacBookPro6,2").nextSiblingElement("dict");
+    //qDebug() << MacBookPro62.tagName() << MacBookPro62.text() << MacBookPro62.nodeName();
 
-                            }
+    QDomElement GPUDeviceID = findElementChild(MacBookPro62,"Vendor10deDevice0a29");
+    qDebug() << "GPUDeviceID" << GPUDeviceID.tagName() << GPUDeviceID.text();
 
-                        }
+    QDomElement BoostPState = findElementSibling(GPUDeviceID,"BoostPState");
+    qDebug() << "BoostPState" << BoostPState.tagName() << BoostPState.text();
 
-                    }
-                }
-                else
-                {
-                    xmlReader.skipCurrentElement();
-                }
-            }
-        }
-    }
+    QDomElement BoostPStateArray = BoostPState.nextSiblingElement("array");
+    qDebug() << "BoostPStateArray" << BoostPStateArray.tagName() << BoostPStateArray.text();
 
-
-
-    //    while(!xmlReader.atEnd() && !xmlReader.hasError())
-    //    {
-    //        QXmlStreamReader::TokenType token = xmlReader.readNext();
-    //        if(token == QXmlStreamReader::StartElement)
-    //        {
-    //            //qDebug() << xmlReader.name();
-
-    //            if(xmlReader.name().compare(static_cast<QString>("key"),Qt::CaseInsensitive) == 0)
-    //            {
-    //                qDebug() << "Found IOKitPersonalities";
-    //            }
-    //        }
-    //    }
-
-    //Creating QSettings object. "NativeFormat" is for accessing XML-based .plist files.
-    //QSettings settings(PATCHED_FILE_PATH, QSettings::NativeFormat);
-
-
-    //Find a way to parse file to : IOKitPersonalities -> AGPM -> Machines -> MacBookPro6,2 -> Vendor10deDevice0a29
-    //qDebug() << settings.value("IOKitPersonalities");
-    //qDebug() << settings.allKeys();
-
-    //Check if kernelFile is Writable
-    //if(!settings.isWritable())
-    //{
-    //    //TODO : handle not writable file
-    //    return;
-    //}
-
-    //if(settings.contains("LogControl"))
-    //{
-    //    qDebug() << "Contains Log Control";
-    //}
-    //else
-    //{
-    //    qDebug() << "Does not contains Log Control";
-    //}
-
+    tmpFile.close();
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)
 {
     //Use Kext Utility or command lines utils to load the file in Kernel
     //kextload
+
+    //Disable srcutils: https://derflounder.wordpress.com/2015/10/05/configuring-system-integrity-protection-without-booting-to-recovery-hd/
 
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
     int Status = 0;
@@ -350,4 +297,50 @@ int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
     //QFile::copy(kernelFile->fileName()  + ".bak", kernelFile->fileName());
 
     return Status;
+}
+
+void MainWindow::searchForItem(QXmlStreamReader* xmlReader, QString tagType, QString tagName)
+{
+    //https://openclassrooms.com/forum/sujet/qtxml-atteindre-un-node-donnee-pour-en-prendre-son-texte-22633
+
+    while (QXmlStreamReader::EndDocument != xmlReader->readNext())
+    {
+        if (xmlReader->name() == tagType)
+        {
+            if(xmlReader->readElementText() == tagName)
+            {
+                qDebug() << "Text found : " + tagName;
+                break;
+                //return;
+            }
+        }
+    }
+}
+
+QDomElement MainWindow::findElementChild(QDomElement parent, const QString &textToFind)
+{
+    for(QDomElement elem = parent.firstChildElement(); !elem.isNull(); elem = elem.nextSiblingElement())
+    {
+        if(elem.text()==textToFind) return elem;
+
+        QDomElement e = findElementChild(elem, textToFind);
+
+        if(!e.isNull()) return e;
+    }
+
+    return QDomElement();
+}
+
+QDomElement MainWindow::findElementSibling(QDomElement parent, const QString &textToFind)
+{
+    for(QDomElement elem = parent.nextSiblingElement(); !elem.isNull(); elem = elem.nextSiblingElement())
+    {
+        if(elem.text()==textToFind) return elem;
+
+        QDomElement e = findElementChild(elem, textToFind);
+
+        if(!e.isNull()) return e;
+    }
+
+    return QDomElement();
 }

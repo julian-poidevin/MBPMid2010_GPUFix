@@ -57,6 +57,10 @@ private:
     void patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);
     int restoreOldKernelExtension(QFile* kernelFile);
+    void recursiveSearchElement(QXmlStreamReader kernelFile, QString StringToSearch);
+    void searchForItem(QXmlStreamReader *xmlReader, QString tagType, QString tagName);
+    QDomElement findElementChild(QDomElement parent, const QString &textToFind);
+    QDomElement findElementSibling(QDomElement parent, const QString &textToFind);
 };
 
 #endif // MAINWINDOW_H
