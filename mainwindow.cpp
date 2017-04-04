@@ -244,12 +244,17 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     QFile::copy(kernelFile->fileName(), PATCHED_FILE_PATH);
 
     QFile tmpFile(PATCHED_FILE_PATH);
-
     if(!tmpFile.open(QIODevice::ReadWrite | QIODevice::Text))
     {
         qDebug() << "Could not open tmp File";
         return;
     }
+
+    //The QDomDocument class represents an XML document.
+    QDomDocument xmlBOM;
+
+    // Set data into the QDomDocument before processing
+    xmlBOM.setContent(&tmpFile);
 
     /* Definition of struct and enum to automaticaly parse file*/
     typedef enum
@@ -273,50 +278,56 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {"Vendor10deDevice0a29" , {}            , FindChild    },
         {"BoostPState"          , {}            , FindSibling  },
         {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
-        {""                     , {2,2,2,2}     , FillArray    }
+        {""                     , {1,1,1,1}     , FillArray    },
+        {"BoostTime"            , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {""                     , {3,3,3,3}     , FillArray    }
     };
 
 
-    //The QDomDocument class represents an XML document.
-    QDomDocument xmlBOM;
 
-    // Set data into the QDomDocument before processing
-    xmlBOM.setContent(&tmpFile);
+    QDomElement currentNode = xmlBOM.firstChildElement("plist");
+    QDomElement nextNode;
 
-    // Extract the root markup
-    QDomElement root = xmlBOM.firstChildElement("plist");
+    for (int i = 0; i < confTree.size(); ++i)
+    {
+        //qDebug() << confTree.at(i).nodeName << confTree.at(i).ActionToPerform;
+        switch (confTree.at(i).ActionToPerform){
+        case FindChild:
+            nextNode = findElementChild(currentNode,confTree.at(i).nodeName);
+            qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
+            break;
 
-    //Parse tree
-    QDomElement MacBookPro62 = findElementChild(root,"MacBookPro6,2").nextSiblingElement("dict");
-    //qDebug() << MacBookPro62.tagName() << MacBookPro62.text() << MacBookPro62.nodeName();
+        case FindSibling:
+            nextNode = findElementSibling(currentNode,confTree.at(i).nodeName);
+            qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
+            break;
 
-    QDomElement GPUDeviceID = findElementChild(MacBookPro62,"Vendor10deDevice0a29");
-    qDebug() << "GPUDeviceID" << GPUDeviceID.tagName() << GPUDeviceID.text();
+        case NextSibling:
+            nextNode = currentNode.nextSiblingElement(confTree.at(i).nodeName);
+            qDebug() << "NextSibling - " << nextNode.tagName();
+            break;
 
-    QDomElement BoostPState = findElementSibling(GPUDeviceID,"BoostPState");
-    qDebug() << "BoostPState" << BoostPState.tagName() << BoostPState.text();
+        case FirstChild:
+            nextNode = currentNode.firstChildElement(confTree.at(i).nodeName);
+            qDebug() << "FirstChild - " << nextNode.tagName();
+            break;
 
-    QDomElement BoostPStateArray = BoostPState.nextSiblingElement("array");
-    qDebug() << "BoostPStateArray" << BoostPStateArray.tagName() << BoostPStateArray.text() << BoostPStateArray.nodeName();
+        case FillArray:
+            //TODO : Fix the first item only being replaced correctly
+            currentNode.firstChild().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+            currentNode.firstChild().firstChild().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
+            currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
+            currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
 
-    QDomElement BoostPStateArrayInteger = BoostPStateArray.firstChildElement("integer");
-    qDebug() << "BoostPStateArrayInteger" << BoostPStateArrayInteger.tagName() << BoostPStateArrayInteger.text() << BoostPStateArrayInteger.nodeName();
+            break;
 
-    //Finally managing to change node value
-    //TODO : Create function with loop
-    BoostPStateArrayInteger.firstChild().setNodeValue("test1");
-    BoostPStateArrayInteger.nextSibling().firstChild().setNodeValue("test2");
-    BoostPStateArrayInteger.nextSibling().nextSibling().firstChild().setNodeValue("test3");
-    BoostPStateArrayInteger.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue("test4");
+        default:
+            break;
+        }
 
-    QDomElement Heuristic = findElementSibling(GPUDeviceID,"Heuristic");
-    qDebug() << "Heuristic" << Heuristic.tagName() << Heuristic.text();
-
-
-
-
-
+        currentNode = nextNode;
+    }
 
     // Write changes to same file
     tmpFile.resize(0);
