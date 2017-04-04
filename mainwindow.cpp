@@ -251,6 +251,33 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         return;
     }
 
+    /* Definition of struct and enum to automaticaly parse file*/
+    typedef enum
+    {
+        FindChild,
+        FindSibling,
+        NextSibling,
+        FirstChild,
+        FillArray
+    }EActions;
+
+    typedef struct{
+        QString nodeName;
+        QVector<int> ArrayValues;
+        EActions ActionToPerform;
+    }nodeTree;
+
+    QVector<nodeTree> confTree={
+        {"MacBookPro6,2"        , {}            , FindChild    },
+        {"dict"                 , {}            , NextSibling  },
+        {"Vendor10deDevice0a29" , {}            , FindChild    },
+        {"BoostPState"          , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {2,2,2,2}     , FillArray    }
+    };
+
+
     //The QDomDocument class represents an XML document.
     QDomDocument xmlBOM;
 
@@ -278,17 +305,24 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 
     //Finally managing to change node value
     //TODO : Create function with loop
-    BoostPStateArrayInteger.firstChild().setNodeValue("tatounet");
-    BoostPStateArrayInteger.nextSibling().firstChild().setNodeValue("tatounet2");
-    BoostPStateArrayInteger.nextSibling().nextSibling().firstChild().setNodeValue("tatounet3");
-    BoostPStateArrayInteger.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue("tatounet4");
+    BoostPStateArrayInteger.firstChild().setNodeValue("test1");
+    BoostPStateArrayInteger.nextSibling().firstChild().setNodeValue("test2");
+    BoostPStateArrayInteger.nextSibling().nextSibling().firstChild().setNodeValue("test3");
+    BoostPStateArrayInteger.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue("test4");
+
+    QDomElement Heuristic = findElementSibling(GPUDeviceID,"Heuristic");
+    qDebug() << "Heuristic" << Heuristic.tagName() << Heuristic.text();
+
+
+
+
+
 
     // Write changes to same file
     tmpFile.resize(0);
     QTextStream stream;
     stream.setDevice(&tmpFile);
     xmlBOM.save(stream, 4);
-
 
     tmpFile.close();
 }
