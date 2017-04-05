@@ -163,7 +163,7 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
     {
         QMessageBox::information(this,"File not found","Any corresponding file was found, please search for the file");
 
-        //TODO : FileDialog won't let user brown into .kext files Contents
+        //TODO : FileDialog won't let user browse into .kext files Contents
         QString dir = QFileDialog::getOpenFileName(this, tr("Open Info.plist file"),
                                                    "/System/Library/Extensions/AppleGraphicsPowerManagement.kext/",
                                                    "Property List Files (Info.plist)");
@@ -278,13 +278,30 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {"Vendor10deDevice0a29" , {}            , FindChild    },
         {"BoostPState"          , {}            , FindSibling  },
         {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
         {""                     , {1,1,1,1}     , FillArray    },
         {"BoostTime"            , {}            , FindSibling  },
         {"array"                , {}            , NextSibling  },
-        {""                     , {3,3,3,3}     , FillArray    }
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {3,3,3,3}     , FillArray    },
+        {"Heuristic"            , {}            , FindSibling  },
+        {"Threshold_High"       , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {4,4,4,4}     , FillArray    },
+        {"Threshold_High_v"     , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {5,5,5,5}     , FillArray    },
+        {"Threshold_Low"        , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {6,6,6,6}     , FillArray    },
+        {"Threshold_Low_v"      , {}            , FindSibling  },
+        {"array"                , {}            , NextSibling  },
+        {"integer"              , {}            , FirstChild   },
+        {""                     , {7,7,7,7}     , FillArray    }
     };
-
-
 
     QDomElement currentNode = xmlBOM.firstChildElement("plist");
     QDomElement nextNode;
@@ -314,11 +331,12 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             break;
 
         case FillArray:
-            //TODO : Fix the first item only being replaced correctly
-            currentNode.firstChild().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
-            currentNode.firstChild().firstChild().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
+            currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+            currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
             currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
             currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
+
+            nextNode = currentNode.parentNode().toElement();
 
             break;
 
@@ -359,24 +377,6 @@ int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
     //QFile::copy(kernelFile->fileName()  + ".bak", kernelFile->fileName());
 
     return Status;
-}
-
-void MainWindow::searchForItem(QXmlStreamReader* xmlReader, QString tagType, QString tagName)
-{
-    //https://openclassrooms.com/forum/sujet/qtxml-atteindre-un-node-donnee-pour-en-prendre-son-texte-22633
-
-    while (QXmlStreamReader::EndDocument != xmlReader->readNext())
-    {
-        if (xmlReader->name() == tagType)
-        {
-            if(xmlReader->readElementText() == tagName)
-            {
-                qDebug() << "Text found : " + tagName;
-                break;
-                //return;
-            }
-        }
-    }
 }
 
 QDomElement MainWindow::findElementChild(QDomElement parent, const QString &textToFind)
