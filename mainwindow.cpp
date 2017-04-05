@@ -81,6 +81,27 @@ bool MainWindow::init()
         isInitOk = false;
     }
 
+    //Search for SIP Status
+    if(isSIPEnabled())
+    {
+        ui->patchButton->setEnabled(false);
+        ui->restoreButton->setEnabled(false);
+
+        QMessageBox msgBox;
+
+        QAbstractButton* pButtonYes = msgBox.addButton(tr("Take me to tutorial"), QMessageBox::YesRole);
+        msgBox.addButton(tr("Nope"), QMessageBox::NoRole);
+        msgBox.show();
+
+        int answer = QMessageBox::information(this,"SIP Enabled","The System Integrity Protection is enabled\nPlease follow the instructions to disable it", QMessageBox::Yes | QMessageBox::No);
+
+        if (answer == QMessageBox::YesRole)
+        {
+            QString link = "http://www.google.com";
+            QDesktopServices::openUrl(QUrl(link));
+        }
+    }
+
     return isInitOk;
 }
 
@@ -102,6 +123,34 @@ QString MainWindow::getMBPModelVersion()
     MBPModelVersion = MBPModelVersion.simplified();
 
     return MBPModelVersion;
+}
+
+bool MainWindow::isSIPEnabled(void)
+{
+    QString SIPStatus;
+    QProcess process;
+
+    //Execute commande line
+    process.start("csrutil status");
+
+    //Wait forever until finished
+    process.waitForFinished(-1);
+
+    //Get command line output
+    SIPStatus = process.readAllStandardOutput();
+
+//#ifndef WINDOWS
+    if(SIPStatus.contains("disable"))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+//#else
+  //  return false;
+//#endif
 }
 
 
@@ -277,29 +326,17 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {"dict"                 , {}            , NextSibling  },
         {"Vendor10deDevice0a29" , {}            , FindChild    },
         {"BoostPState"          , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {1,1,1,1}     , FillArray    },
         {"BoostTime"            , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {3,3,3,3}     , FillArray    },
         {"Heuristic"            , {}            , FindSibling  },
         {"Threshold_High"       , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {4,4,4,4}     , FillArray    },
         {"Threshold_High_v"     , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {5,5,5,5}     , FillArray    },
         {"Threshold_Low"        , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {6,6,6,6}     , FillArray    },
         {"Threshold_Low_v"      , {}            , FindSibling  },
-        {"array"                , {}            , NextSibling  },
-        {"integer"              , {}            , FirstChild   },
         {""                     , {7,7,7,7}     , FillArray    }
     };
 
@@ -331,6 +368,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             break;
 
         case FillArray:
+
+            currentNode = currentNode.nextSiblingElement("array").firstChildElement("integer");
+
             currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
             currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
             currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));

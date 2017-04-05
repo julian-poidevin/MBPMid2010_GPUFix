@@ -21,6 +21,7 @@
 #include <QSettings>
 #include <QList>
 #include <QtXml>
+#include <QDesktopServices>
 
 using namespace std; // Indique quel espace de noms on va utiliser
 
@@ -59,6 +60,7 @@ private:
     int restoreOldKernelExtension(QFile* kernelFile);
     QDomElement findElementChild(QDomElement parent, const QString &textToFind);
     QDomElement findElementSibling(QDomElement parent, const QString &textToFind);
+    bool isSIPEnabled(void);
 };
 
 #endif // MAINWINDOW_H
