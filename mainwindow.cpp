@@ -88,16 +88,17 @@ bool MainWindow::init()
         ui->restoreButton->setEnabled(false);
 
         QMessageBox msgBox;
+        msgBox.setInformativeText("The System Integrity Protection is enabled\nPlease follow the instructions to disable it");
+        msgBox.setWindowTitle("SIP Enabled");
 
         QAbstractButton* pButtonYes = msgBox.addButton(tr("Take me to tutorial"), QMessageBox::YesRole);
         msgBox.addButton(tr("Nope"), QMessageBox::NoRole);
-        msgBox.show();
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
 
-        int answer = QMessageBox::information(this,"SIP Enabled","The System Integrity Protection is enabled\nPlease follow the instructions to disable it", QMessageBox::Yes | QMessageBox::No);
-
-        if (answer == QMessageBox::YesRole)
+        if (msgBox.clickedButton()== pButtonYes)
         {
-            QString link = "http://www.google.com";
+            QString link = "https://www.youtube.com/watch?v=Wmhal4shmVo";
             QDesktopServices::openUrl(QUrl(link));
         }
     }
@@ -139,7 +140,7 @@ bool MainWindow::isSIPEnabled(void)
     //Get command line output
     SIPStatus = process.readAllStandardOutput();
 
-//#ifndef WINDOWS
+    #ifndef WINDOWS
     if(SIPStatus.contains("disable"))
     {
         return false;
@@ -148,9 +149,9 @@ bool MainWindow::isSIPEnabled(void)
     {
         return true;
     }
-//#else
-  //  return false;
-//#endif
+    #else
+      return false;
+    #endif
 }
 
 
