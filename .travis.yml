@@ -1,64 +1,53 @@
 language: cpp
-
 os:
-  - osx
-
+- osx
 branches:
   only:
-    - develop
-    - master
-
+  - develop
+  - master
 env:
   global:
-    # $TAGPERM environment variable
-    # generate a token at https://github.com/settings/tokens and encrypt it
-    # with `travis encrypt TAGPERM=<yoursecrettoken> --add env.global`
-    # also see: https://docs.travis-ci.com/user/encryption-keys/#Usage
-    - secure: Wt43koA55PGba7TsJ85f9vHyW4b/QfPh2Ywhw5+40sba5Us4Y3h+l23VyVjQbXuHfCGgC+t5+AABm1ubhL4MjCvxzS9BepjhNN92LPXoLfBRM2AHhNLWMKLLxt4T7OofjnLPw21l6cjjVrlZZojVbN4MnuG2IPUeUzoEBuA5TPE=
-    # KEY_PASSWORD
-    - secure: "Mte2zY0rgIa4M4bIeSKijFAFOtFy+DahRYCUgOB60cuS4b/+HMHnfmVGMqnBKitC9KVzb5fctMt2pGPK2hdlirvfkOd9ctEaEd1qSzADJjfQUKqLReOfi1N6Ln2dYqlZoDjnYpGWwTUl/uX+KtWomYW2TCZZG/uJEeh3QYkxlJQ="
-    # DEVELOPER_NAME
-    - secure: "CrB159u8KEwtsiCxnwvnCumiRkGgL+9aFgI2dosUvj3PtfebcVdhzRKBt+17jLapLCQEYoml8RVszLNuYpZu8y/3DhCk4ftWMumnvKOp8CIFb/4BFKMZxyuw+HlMg5oKwY4GOopnHo4mTEM51pDHMP8rfIxCjLimVeDc0uZaaj8="
+  - secure: Wt43koA55PGba7TsJ85f9vHyW4b/QfPh2Ywhw5+40sba5Us4Y3h+l23VyVjQbXuHfCGgC+t5+AABm1ubhL4MjCvxzS9BepjhNN92LPXoLfBRM2AHhNLWMKLLxt4T7OofjnLPw21l6cjjVrlZZojVbN4MnuG2IPUeUzoEBuA5TPE=
+  - secure: Mte2zY0rgIa4M4bIeSKijFAFOtFy+DahRYCUgOB60cuS4b/+HMHnfmVGMqnBKitC9KVzb5fctMt2pGPK2hdlirvfkOd9ctEaEd1qSzADJjfQUKqLReOfi1N6Ln2dYqlZoDjnYpGWwTUl/uX+KtWomYW2TCZZG/uJEeh3QYkxlJQ=
+  - secure: CrB159u8KEwtsiCxnwvnCumiRkGgL+9aFgI2dosUvj3PtfebcVdhzRKBt+17jLapLCQEYoml8RVszLNuYpZu8y/3DhCk4ftWMumnvKOp8CIFb/4BFKMZxyuw+HlMg5oKwY4GOopnHo4mTEM51pDHMP8rfIxCjLimVeDc0uZaaj8=
+  - secure: C7cKWvHp5DYPMxj6JanQhN0h4Vw0KXSgGWJz07Flrhu5VoK00x3ey1QfJFz73aYOMf44DfmIMnbVTP0RA+cRS/gyjjAg1TGDYJMTBEw85iHIiieCdE4gh45WvIkYbh+/tz5dPD/c5kbn3apqpfG2nLQAhYIS0QpgNo0GA+OU/c+uOBdO2TH4R390dAXF8Kx0sp9+vydZ2Aa4FTdO5Yeruj7vlRDHIIwc3SJSllan3+3+frH5ym6ZAhkLjEfTyOLoYQ3Tcn2z03ysl0mBtcATxTvMgYTtb8gQWipX+wlpA8s1MuVdvQDipREb299C7IzkGo/N8ujNSw8vGOyxKh4fL5jUEMce1OwOO78tJ9cm9G6zRNFUN3MU5jQgGIt8MQYKTGAdDM6ZVIwX8y/HPBr29tTT9G1qOmJ7X47kfRnNXxTxU2b24Ul/x3zdrzPuveIyp8PU1dvy7EF4gKsbh9KBeMt5I122MnV6JuZQdZ1iQPgy5RVsm56dXqQ06WvJKauMztya+dYNdNv/+kBVDJBfj/r+D88/a2tJj3Mszit32BTdzE5dLKqBQQzpNDl8ZJ2KGCT/HwvMWMDNqVha6yE+tYbDQORlLJeDSc1JPl98yQtiDK3GCa9/5/7Yo5NFwH2RcLR67iLnvwA+wPLeNRxQvE7RnkQiLdOkPgIct6SOKvE=
+  - secure: B4ATX+4jcYKC812wb8F7JMkYF+DIrOSoCNy3giv9UllLofRFhCrjr1Ud3fbLSB9wPFoW1as2nSvTnLcwikbtgj9M/bcFxjoeBtLRbw8jftUjZkbhigYImq36SnHSFtxo/nE24enIYkvztI356zr3LuOPObW/TWucEIulTF0H+YBtwkHDJrLhjCaf8tDXcmdJcoB+LV1ehVOpQa3Gkp43kiP33eH+WU8lqBMRSb3BpYOHl9tMHy7dRWpQbMbDvL3SdwsgBheLxBPjfy8vmrgGE618IPeRD52l9vVIJvxER17dYUkaF5J69YA3q4mwFXSdCyZpPEVpwWltNxBVy2MG/wvjLBT6mKzweS+Z6cTraLbD25xXYNEugQRRSSj71LXnJbEzK4vrWJoo64xDJ0LtVRQX/b+TowFxWrD03goah0xVb37H8FHA7POBzxCIOx7Oz3ZDydjJGq1eiebulJULgv/Yc2k1roEMsxGtj7nLOoNasaO1pSHNPs2Ym/wKaE4I+JAp7OrCcwCD2bzCExfWPDZ3f5iPf9Vf4H8wBqMNI+LmX5HeO9dbJWjq11uc0LPFwQ9klFRXH/dkHcv7mK3L6P/J/h1SI/M0IronUtHADiSS7YBdHiqjbRzDZQbe9fD0xbJ1vmX97Ma+yp8Xu+ID6qYumEbLLrz4w8px5VAMd0Y=
+  - secure: ltJva/byxA3Xhdhiv+gu0rtkrtVuC95hckq2Ab4bnMThfDrx3uEHWz/ldDC0bWDanCx8/nlJ9ge7cFdRXk9ceKq9QQ8QwQT6MfcZveul5rANO31sgWYrPYTMN/0cOyxYG8RdWomT1rcwDVLj5suGPs6mLlwGvjTBDTv+euhNxLlpxmWUF7HKssK+1cLJHhnHZlUcF33dsg39uc98LXjC5xrt/59Mr4EQ7N3G69vuAkEhDeFKke5EV5pBBJje2rebXtbABRx9MZNqfovy6XWbPm1SngAMYHG3Y1Gnjl4eseVfuSVIe9heGlQMGLuGjah8pSZBafQsWuDbmDaXEMxKXf3NpkBf2zoIVLVQlXimaFY7Ug1pUOXUwW76v4YnYpTP1DH9TeZtgCUsYXDkNcWJ4XQjaqKVfr+yXJdT4UFahM2KL2wA7Pdv9hnf1A5wczHNZ+gkgN+GwjIWv2uykU9F8MucnMXjJIrjEy0yjguDJebAXILSFKqo5b2QgKzVY7stnqo4N2HL2smEa4fkMEhL/o8Ze33C9Fj1AbXpyhgoErYCl1hcYVtzw9cyYvg04rAp4Kg1h0Mtao1Z0WgT/Yeh6RVizKymAnxIWk/jxGk5V1L+6+ekYcMUOuGMjANT/3VGOE2RzMzv/YzV7ZqbnavNUHWOvO+z7OnTpgE194b5KUY=
   matrix:
-    - CONFIG=release
-    #- CONFIG=debug
-
+  - CONFIG=release
 install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-    then
-      lsb_release -a
-      sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
-      sudo apt-add-repository -y ppa:beineri/opt-qt562
-      sudo apt-get -qq update
-      sudo apt-get -qq install g++-4.8 libc6-i386 qt56tools qt56svg qt56webkit qt56script
-      export CXX="g++-4.8"
-      export CC="gcc-4.8"x
-    fi
-  # OS X Qt http://braumeister.org/search/qt5
-  # we need to use macdeployqtfix after using macdeployqt to fix the library paths!
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-    then
-      brew update > /dev/null
-      brew install qt5
-      export QTDIR="/usr/local/opt/qt5"
-    fi
-
+- |
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  then
+    lsb_release -a
+    sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+    sudo apt-add-repository -y ppa:beineri/opt-qt562
+    sudo apt-get -qq update
+    sudo apt-get -qq install g++-4.8 libc6-i386 qt56tools qt56svg qt56webkit qt56script
+    export CXX="g++-4.8"
+    export CC="gcc-4.8"x
+  fi
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+  then
+    brew update > /dev/null
+    brew install qt5
+    export QTDIR="/usr/local/opt/qt5"
+  fi
 script:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-    then
-      QTDIR="/opt/qt56"
-      PATH="$QTDIR/bin:$PATH"
-      qt56-env.sh
-    fi
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-    then
-      PATH="$QTDIR/bin:$PATH"
-      LDFLAGS=-L$QTDIR/lib
-      CPPFLAGS=-I$QTDIR/include
-    fi
-  - qmake MBPMid2010-GPU-Fix.pro CONFIG+=$CONFIG
-  - make
+- |
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  then
+    QTDIR="/opt/qt56"
+    PATH="$QTDIR/bin:$PATH"
+    qt56-env.sh
+  fi
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+  then
+    PATH="$QTDIR/bin:$PATH"
+    LDFLAGS=-L$QTDIR/lib
+    CPPFLAGS=-I$QTDIR/include
+  fi
+- qmake MBPMid2010-GPU-Fix.pro CONFIG+=$CONFIG
+- make
