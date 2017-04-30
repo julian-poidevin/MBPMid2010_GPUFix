@@ -32,6 +32,5 @@ install:
     fi
 
 script:
-  - qmake -project
   - qmake MBPMid2010-GPU-Fix.pro
   - make
