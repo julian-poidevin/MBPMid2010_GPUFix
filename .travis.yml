@@ -1,8 +1,35 @@
-before_install:
- - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
- - sudo apt-get update -qq
- - sudo apt-get install qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
- - sudo apt-get install qt5-default qttools5-dev-tools
+language: cpp
+
+os:
+  - linux
+  - osx
+  
+branches:
+  only:
+    - develop
+    - master
+ 
+ install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      lsb_release -a
+      sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+      sudo apt-add-repository -y ppa:beineri/opt-qt562
+      sudo apt-get -qq update
+      sudo apt-get -qq install g++-4.8 libc6-i386 qt56tools qt56svg qt56webkit qt56script
+      export CXX="g++-4.8"
+      export CC="gcc-4.8"x
+    fi
+  # OS X Qt http://braumeister.org/search/qt5
+  # we need to use macdeployqtfix after using macdeployqt to fix the library paths!
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      brew update > /dev/null
+      brew install qt5
+      export QTDIR="/usr/local/opt/qt5"
+    fi
 
 script:
   - qmake -project
