@@ -27,6 +27,7 @@ void MainWindow::exit()
 
 void MainWindow::on_patchButton_clicked()
 {
+    //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
@@ -140,7 +141,7 @@ bool MainWindow::isSIPEnabled(void)
     //Get command line output
     SIPStatus = process.readAllStandardOutput();
 
-    #ifndef WINDOWS
+#ifndef WINDOWS
     if(SIPStatus.contains("disable"))
     {
         return false;
@@ -189,7 +190,10 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
         while(it.hasNext())
         {
             it.next();
-            listOfFiles.push_back(it.filePath());
+            if (it.filePath().contains("AppleGraphicsPowerManagement"))
+            {
+                listOfFiles.push_back(it.filePath());
+            }
         }
     }
 
@@ -238,7 +242,7 @@ bool MainWindow::isCompatibleVersion(QString modelVersion)
 
 #ifdef MAC
 
-    //TODO : Search in a list
+    //TODO : Search in a list if several models compatible
     if(modelVersion == "MacBookPro6,2")
     {
         isCompatibleVersion = true;
@@ -274,7 +278,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     //http://stackoverflow.com/questions/20240511/qsettings-mac-and-plist-files
     //https://forum.qt.io/topic/37247/qsettings-with-systemscope-not-saving-plist-file-in-os-x-mavericks/6
 
-    backupOldKernelExtension();
+
+    //TODO
+    //backupOldKernelExtension();
 
 #ifdef MAC
 #define PATCHED_FILE_PATH "/tmp/PatchedInfo.plist"
@@ -327,18 +333,18 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {"dict"                 , {}            , NextSibling  },
         {"Vendor10deDevice0a29" , {}            , FindChild    },
         {"BoostPState"          , {}            , FindSibling  },
-        {""                     , {1,1,1,1}     , FillArray    },
+        {""                     , {2,2,2,2}     , FillArray    },
         {"BoostTime"            , {}            , FindSibling  },
-        {""                     , {3,3,3,3}     , FillArray    },
+        {""                     , {2,2,2,2}     , FillArray    },
         {"Heuristic"            , {}            , FindSibling  },
         {"Threshold_High"       , {}            , FindSibling  },
-        {""                     , {4,4,4,4}     , FillArray    },
+        {""                     , {0,0,100,200} , FillArray    },
         {"Threshold_High_v"     , {}            , FindSibling  },
-        {""                     , {5,5,5,5}     , FillArray    },
+        {""                     , {0,0,98,100}  , FillArray    },
         {"Threshold_Low"        , {}            , FindSibling  },
-        {""                     , {6,6,6,6}     , FillArray    },
+        {""                     , {0,0,0,200}   , FillArray    },
         {"Threshold_Low_v"      , {}            , FindSibling  },
-        {""                     , {7,7,7,7}     , FillArray    }
+        {""                     , {0,0,4,200}   , FillArray    }
     };
 
     QDomElement currentNode = xmlBOM.firstChildElement("plist");
