@@ -1,14 +1,28 @@
 language: cpp
 
 os:
-  - linux
   - osx
-  
+
 branches:
   only:
     - develop
     - master
- 
+
+env:
+  global:
+    # $TAGPERM environment variable
+    # generate a token at https://github.com/settings/tokens and encrypt it
+    # with `travis encrypt TAGPERM=<yoursecrettoken> --add env.global`
+    # also see: https://docs.travis-ci.com/user/encryption-keys/#Usage
+    - secure: Wt43koA55PGba7TsJ85f9vHyW4b/QfPh2Ywhw5+40sba5Us4Y3h+l23VyVjQbXuHfCGgC+t5+AABm1ubhL4MjCvxzS9BepjhNN92LPXoLfBRM2AHhNLWMKLLxt4T7OofjnLPw21l6cjjVrlZZojVbN4MnuG2IPUeUzoEBuA5TPE=
+    # KEY_PASSWORD
+    - secure: "Mte2zY0rgIa4M4bIeSKijFAFOtFy+DahRYCUgOB60cuS4b/+HMHnfmVGMqnBKitC9KVzb5fctMt2pGPK2hdlirvfkOd9ctEaEd1qSzADJjfQUKqLReOfi1N6Ln2dYqlZoDjnYpGWwTUl/uX+KtWomYW2TCZZG/uJEeh3QYkxlJQ="
+    # DEVELOPER_NAME
+    - secure: "CrB159u8KEwtsiCxnwvnCumiRkGgL+9aFgI2dosUvj3PtfebcVdhzRKBt+17jLapLCQEYoml8RVszLNuYpZu8y/3DhCk4ftWMumnvKOp8CIFb/4BFKMZxyuw+HlMg5oKwY4GOopnHo4mTEM51pDHMP8rfIxCjLimVeDc0uZaaj8="
+  matrix:
+    - CONFIG=release
+    #- CONFIG=debug
+
 install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
@@ -32,5 +46,19 @@ install:
     fi
 
 script:
-  - qmake MBPMid2010-GPU-Fix.pro
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      QTDIR="/opt/qt56"
+      PATH="$QTDIR/bin:$PATH"
+      qt56-env.sh
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      PATH="$QTDIR/bin:$PATH"
+      LDFLAGS=-L$QTDIR/lib
+      CPPFLAGS=-I$QTDIR/include
+    fi
+  - qmake MBPMid2010_GPUFix.pro CONFIG+=$CONFIG
   - make
