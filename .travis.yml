@@ -1,0 +1,64 @@
+language: cpp
+
+os:
+  - osx
+
+branches:
+  only:
+    - develop
+    - master
+
+env:
+  global:
+    # $TAGPERM environment variable
+    # generate a token at https://github.com/settings/tokens and encrypt it
+    # with `travis encrypt TAGPERM=<yoursecrettoken> --add env.global`
+    # also see: https://docs.travis-ci.com/user/encryption-keys/#Usage
+    - secure: Wt43koA55PGba7TsJ85f9vHyW4b/QfPh2Ywhw5+40sba5Us4Y3h+l23VyVjQbXuHfCGgC+t5+AABm1ubhL4MjCvxzS9BepjhNN92LPXoLfBRM2AHhNLWMKLLxt4T7OofjnLPw21l6cjjVrlZZojVbN4MnuG2IPUeUzoEBuA5TPE=
+    # KEY_PASSWORD
+    - secure: "Mte2zY0rgIa4M4bIeSKijFAFOtFy+DahRYCUgOB60cuS4b/+HMHnfmVGMqnBKitC9KVzb5fctMt2pGPK2hdlirvfkOd9ctEaEd1qSzADJjfQUKqLReOfi1N6Ln2dYqlZoDjnYpGWwTUl/uX+KtWomYW2TCZZG/uJEeh3QYkxlJQ="
+    # DEVELOPER_NAME
+    - secure: "CrB159u8KEwtsiCxnwvnCumiRkGgL+9aFgI2dosUvj3PtfebcVdhzRKBt+17jLapLCQEYoml8RVszLNuYpZu8y/3DhCk4ftWMumnvKOp8CIFb/4BFKMZxyuw+HlMg5oKwY4GOopnHo4mTEM51pDHMP8rfIxCjLimVeDc0uZaaj8="
+  matrix:
+    - CONFIG=release
+    #- CONFIG=debug
+
+install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      lsb_release -a
+      sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+      sudo apt-add-repository -y ppa:beineri/opt-qt562
+      sudo apt-get -qq update
+      sudo apt-get -qq install g++-4.8 libc6-i386 qt56tools qt56svg qt56webkit qt56script
+      export CXX="g++-4.8"
+      export CC="gcc-4.8"x
+    fi
+  # OS X Qt http://braumeister.org/search/qt5
+  # we need to use macdeployqtfix after using macdeployqt to fix the library paths!
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      brew update > /dev/null
+      brew install qt5
+      export QTDIR="/usr/local/opt/qt5"
+    fi
+
+script:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      QTDIR="/opt/qt56"
+      PATH="$QTDIR/bin:$PATH"
+      qt56-env.sh
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      PATH="$QTDIR/bin:$PATH"
+      LDFLAGS=-L$QTDIR/lib
+      CPPFLAGS=-I$QTDIR/include
+    fi
+  - qmake MBPMid2010-GPU-Fix.pro CONFIG+=$CONFIG
+  - make
