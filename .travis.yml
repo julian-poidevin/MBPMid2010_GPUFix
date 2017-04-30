@@ -60,5 +60,5 @@ script:
       LDFLAGS=-L$QTDIR/lib
       CPPFLAGS=-I$QTDIR/include
     fi
-  - qmake MBPMid2010_GPUFix.pro CONFIG+=$CONFIG
+  - qmake MBPMid2010-GPU-Fix.pro CONFIG+=$CONFIG
   - make
