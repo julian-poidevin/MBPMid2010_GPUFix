@@ -9,7 +9,7 @@ branches:
     - develop
     - master
  
- install:
+install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
