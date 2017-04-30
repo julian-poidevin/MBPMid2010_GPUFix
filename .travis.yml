@@ -1,6 +1,6 @@
 install:
   - sudo apt-get update
-  - sudo apt-get install qtdeclarative5-dev
+  - sudo apt-get install qtbase5-dev
 
 script:
   - qmake -project
