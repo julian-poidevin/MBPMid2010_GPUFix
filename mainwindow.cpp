@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#define TEST
-//#define REAL
+//#define TEST
+#define REAL
 
 //#define WINDOWS
 #define MAC
@@ -38,6 +38,7 @@ void MainWindow::on_patchButton_clicked()
         if(1)
         {
             patchKernelExtensionFile(&kernelFile);
+            loadKernelExtension(&kernelFile);
         }
         else
         {
@@ -150,9 +151,9 @@ bool MainWindow::isSIPEnabled(void)
     {
         return true;
     }
-    #else
-      return false;
-    #endif
+#else
+    return false;
+#endif
 }
 
 
@@ -409,6 +410,61 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     //kextload
 
     //Disable srcutils: https://derflounder.wordpress.com/2015/10/05/configuring-system-integrity-protection-without-booting-to-recovery-hd/
+
+    /* Copy real kext into tmp file */
+    QProcess process;
+    QString command = "cp";
+    QStringList arguments;
+    QDir kextDir(kernelFile->fileName());
+    kextDir.cdUp();
+
+    arguments << "-rf" << kextDir.absolutePath() << "/tmp/AppleGraphicsPowerManagement.kext";
+    //Execute commande line
+    process.start(command,arguments);
+    //Wait forever until finished
+    process.waitForFinished(-1);
+
+    /*** Copy patched file into kext ***/
+    command = "cp";
+    arguments.clear();
+    arguments << "-f" << PATCHED_FILE_PATH << "/tmp/AppleGraphicsPowerManagement.kext/Info.plist";
+    //Execute commande line
+    process.start(command,arguments);
+    //Wait forever until finished
+    process.waitForFinished(-1);
+
+    /*** Change permission of modified kext File ***/
+    //TODO find a way to execute process as root
+    command = "chown";
+    arguments.clear();
+    arguments << "-R" << "-v" << "root:wheel" << "/tmp/AppleGraphicsPowerManagement.kext/";
+    //Execute commande line
+    process.start(command,arguments);
+    //Wait forever until finished
+    process.waitForFinished(-1);
+    qDebug() << process.readAllStandardError();
+
+    /*** Unload previous kext file ***/
+    //TODO find a way to execute process as root
+    command = "kextunload";
+    arguments.clear();
+    arguments << "-v" << "/System/Library/Extensions/AppleGraphicsPowerManagement.kext";
+    //Execute commande line
+    process.start(command,arguments);
+    //Wait forever until finished
+    process.waitForFinished(-1);
+    qDebug() << process.readAllStandardError();
+
+    /*** Finally load kext file ***/
+    //TODO find a way to execute process as root
+    command = "kextload";
+    arguments.clear();
+    arguments << "-v" << "/tmp/AppleGraphicsPowerManagement.kext";
+    //Execute commande line
+    process.start(command,arguments);
+    //Wait forever until finished
+    process.waitForFinished(-1);
+    qDebug() << process.readAllStandardError();
 
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
     int Status = 0;
