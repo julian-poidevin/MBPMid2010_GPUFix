@@ -80,6 +80,7 @@ bool MainWindow::init()
     }
     QString fileName = "log.txt";
     logger = new Logger(this, fileName, this->ui->logWindow);
+    logger->setShowDateTime(false);
 
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
@@ -173,6 +174,32 @@ bool MainWindow::isSIPEnabled(void)
 #else
     return false;
 #endif
+}
+
+int MainWindow::executeProcess(QProcess* process, QString command, QStringList arguments)
+{
+    QString errorOutput;
+    QString stdOutput;
+
+    //Execute commande line
+    process->start(command,arguments);
+    //Wait forever until finished
+    process->waitForFinished(-1);
+    errorOutput = process->readAllStandardError();
+    stdOutput = process->readAllStandardOutput();
+    qDebug() << errorOutput;
+
+    if (process->exitCode() == 0)
+    {
+        logger->write("✓ " + stdOutput + "\n");
+        return 0;
+    }
+    else
+    {
+        logger->write("✗ : " + errorOutput + "\n");
+        errorOutput.clear();
+        return -1;
+    }
 }
 
 
@@ -441,83 +468,69 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 int MainWindow::loadKernelExtension(QFile *kernelFile)
 {
     //Use Kext Utility or command lines utils to load the file in Kernel
-    //kextload
-
-    //Disable srcutils: https://derflounder.wordpress.com/2015/10/05/configuring-system-integrity-protection-without-booting-to-recovery-hd/
+    //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
+    int processStatus = 0;
 
     logger->write(" | Loading Kernel Extension\n");
 
     /* Copy real kext into tmp file */
     QProcess process;
-    QString command = "cp";
+    QString command;
     QStringList arguments;
     QDir kextDir(kernelFile->fileName());
     kextDir.cdUp();
 
-    logger->write("Copying actuel kext into tmp\n");
+    logger->write("Copying actuel kext into tmp : ");
+    command = "cp";
+    arguments.clear();
+    arguments << "-rf" << kextDir.absolutePath() << "/tmp/AppleGraphicsPowerManagement.kext : ";
+    processStatus |= executeProcess(&process,command,arguments);
 
-    arguments << "-rf" << kextDir.absolutePath() << "/tmp/AppleGraphicsPowerManagement.kext";
-    //Execute commande line
-    process.start(command,arguments);
-    //Wait forever until finished
-    process.waitForFinished(-1);
-
-    logger->write("Copying patched Info.plist into kext\n");
-
+    logger->write("Copying patched Info.plist into kext : ");
     /*** Copy patched file into kext ***/
     command = "cp";
     arguments.clear();
     arguments << "-f" << PATCHED_FILE_PATH << "/tmp/AppleGraphicsPowerManagement.kext/Info.plist";
     //Execute commande line
-    process.start(command,arguments);
-    //Wait forever until finished
-    process.waitForFinished(-1);
+    processStatus |= executeProcess(&process,command,arguments);
 
-    logger->write("Changing permission of kext\n");
-
+    logger->write("Changing permission of kext : ");
     /*** Change permission of modified kext File ***/
     //TODO find a way to execute process as root
     command = "chown";
     arguments.clear();
     arguments << "-R" << "-v" << "root:wheel" << "/tmp/AppleGraphicsPowerManagement.kext/";
     //Execute commande line
-    process.start(command,arguments);
-    //Wait forever until finished
-    process.waitForFinished(-1);
-    qDebug() << process.readAllStandardError();
+    processStatus |= executeProcess(&process,command,arguments);
 
-    logger->write("Unloading previous kext\n");
-
+    logger->write("Unloading previous kext : ");
     /*** Unload previous kext file ***/
     //TODO find a way to execute process as root
     command = "kextunload";
     arguments.clear();
     arguments << "-v" << "/System/Library/Extensions/AppleGraphicsPowerManagement.kext";
     //Execute commande line
-    process.start(command,arguments);
-    //Wait forever until finished
-    process.waitForFinished(-1);
-    qDebug() << process.readAllStandardError();
+    processStatus |= executeProcess(&process,command,arguments);
 
-    logger->write("Loading modified kext\n");
-
+    logger->write("Loading modified kext : ");
     /*** Finally load kext file ***/
     //TODO find a way to execute process as root
     command = "kextload";
     arguments.clear();
     arguments << "-v" << "/tmp/AppleGraphicsPowerManagement.kext";
     //Execute commande line
-    process.start(command,arguments);
-    //Wait forever until finished
-    process.waitForFinished(-1);
-    qDebug() << process.readAllStandardError();
+    processStatus |= executeProcess(&process,command,arguments);
 
-    //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
-    int Status = 0;
+    if(processStatus == 0)
+    {
+        logger->write("********************* MBP GPU Fixed Successfully *********************\n");
+    }
+    else
+    {
+        logger->write("********************* MBP GPU Fix FAILED *********************\n");
+    }
 
-    if(Status == 0) logger->write("********************* MBP GPU Fixed Successfully *********************\n");
-
-    return Status;
+    return processStatus;
 }
 
 int MainWindow::restoreOldKernelExtension(QFile *kernelFile)
