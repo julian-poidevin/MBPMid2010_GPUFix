@@ -27,3 +27,8 @@
 *.exe
 *.out
 *.app
+
+#Project
+*.user*
+Makefile
+*.qmake*

@@ -1,3 +1,2 @@
 # MBPMid2010_GPUFix
-
-https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/
+[![Build Status](https://travis-ci.org/julian-poidevin/MBPMid2010_GPUFix.svg?branch=develop)](https://travis-ci.org/julian-poidevin/MBPMid2010_GPUFix)
