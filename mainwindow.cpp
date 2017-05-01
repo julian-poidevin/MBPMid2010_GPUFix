@@ -27,6 +27,8 @@ void MainWindow::exit()
 
 void MainWindow::on_patchButton_clicked()
 {
+    bool ok;
+
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
     {
@@ -37,6 +39,13 @@ void MainWindow::on_patchButton_clicked()
         //if (answer == QMessageBox::Yes)
         if(1)
         {
+            password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
+
+            if(!ok || password.isEmpty())
+            {
+                return;
+            }
+
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
             loadKernelExtension(&kernelFile);
@@ -72,6 +81,9 @@ bool MainWindow::init()
 {
     bool isInitOk = true;
     MainWindow::setWindowTitle (APP_NAME);
+
+    //TODO : enable button when functionnality will be avaible
+    ui->restoreButton->setEnabled(false);
 
     //Initialize logger
     if (QFile::exists("log.txt"))
@@ -182,12 +194,21 @@ int MainWindow::executeProcess(QProcess* process, QString command, QStringList a
     QString stdOutput;
 
     //Execute commande line
-    process->start(command,arguments);
-    //Wait forever until finished
-    process->waitForFinished(-1);
+    if (arguments.isEmpty())
+    {
+        process->start(command);
+    }
+    else
+    {
+        process->start(command,arguments);
+    }
+
+    process->write(password.toLocal8Bit());
+    process->write("\n");
+    process->waitForFinished(1000);
     errorOutput = process->readAllStandardError();
     stdOutput = process->readAllStandardOutput();
-    qDebug() << errorOutput;
+    process->closeWriteChannel();
 
     if (process->exitCode() == 0)
     {
@@ -196,6 +217,7 @@ int MainWindow::executeProcess(QProcess* process, QString command, QStringList a
     }
     else
     {
+        qDebug() << errorOutput;
         logger->write("✗ : " + errorOutput + "\n");
         errorOutput.clear();
         return -1;
@@ -469,55 +491,70 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
 {
     //Use Kext Utility or command lines utils to load the file in Kernel
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
+
     int processStatus = 0;
 
     logger->write(" | Loading Kernel Extension\n");
 
     /* Copy real kext into tmp file */
     QProcess process;
+    //QProcess *process = new QProcess(this);
     QString command;
     QStringList arguments;
     QDir kextDir(kernelFile->fileName());
     kextDir.cdUp();
+    kextDir.cdUp();
+
+    logger->write("Removing existing kext in tmp : ");
+    command = "sudo -S rm -rf /tmp/AppleGraphicsPowerManagement.kext";
+    arguments.clear();
+    processStatus |= executeProcess(&process,command,arguments);
 
     logger->write("Copying actuel kext into tmp : ");
-    command = "cp";
+    command = "sudo -S cp -rf /System/Library/Extensions/AppleGraphicsPowerManagement.kext /tmp/AppleGraphicsPowerManagement.kext";
     arguments.clear();
-    arguments << "-rf" << kextDir.absolutePath() << "/tmp/AppleGraphicsPowerManagement.kext : ";
     processStatus |= executeProcess(&process,command,arguments);
 
     logger->write("Copying patched Info.plist into kext : ");
     /*** Copy patched file into kext ***/
-    command = "cp";
+    command = "sudo -S cp -f /tmp/PatchedInfo.plist /tmp/AppleGraphicsPowerManagement.kext/Contents/Info.plist";
     arguments.clear();
-    arguments << "-f" << PATCHED_FILE_PATH << "/tmp/AppleGraphicsPowerManagement.kext/Info.plist";
     //Execute commande line
     processStatus |= executeProcess(&process,command,arguments);
 
     logger->write("Changing permission of kext : ");
     /*** Change permission of modified kext File ***/
-    //TODO find a way to execute process as root
-    command = "chown";
+    command = "sudo -S chown -R -v root:wheel /tmp/AppleGraphicsPowerManagement.kext";
     arguments.clear();
-    arguments << "-R" << "-v" << "root:wheel" << "/tmp/AppleGraphicsPowerManagement.kext/";
     //Execute commande line
     processStatus |= executeProcess(&process,command,arguments);
 
-    logger->write("Unloading previous kext : ");
-    /*** Unload previous kext file ***/
-    //TODO find a way to execute process as root
-    command = "kextunload";
+    logger->write("Removing existing kext : ");
+    command = "sudo -S rm -rf /System/Library/Extensions/AppleGraphicsPowerManagement.kext";
     arguments.clear();
-    arguments << "-v" << "/System/Library/Extensions/AppleGraphicsPowerManagement.kext";
+    processStatus |= executeProcess(&process,command,arguments);
+
+    logger->write("Copying patched kext into Extension : ");
+    /*** Copy patched file into kext ***/
+    command = "sudo -S cp -rf /tmp/AppleGraphicsPowerManagement.kext /System/Library/Extensions/AppleGraphicsPowerManagement.kext";
+    arguments.clear();
     //Execute commande line
     processStatus |= executeProcess(&process,command,arguments);
+
+    //logger->write("Unloading previous kext : ");
+    /*** Unload previous kext file ***/
+    //TODO find a way to execute process as root
+    //command = "sudo -S kextunload -v /System/Library/Extensions/AppleGraphicsPowerManagement.kext";
+    //arguments.clear();
+    //arguments << "-v" << "/System/Library/Extensions/AppleGraphicsPowerManagement.kext";
+    //Execute commande line
+    //processStatus |= executeProcess(&process,command,arguments);
 
     logger->write("Loading modified kext : ");
     /*** Finally load kext file ***/
     //TODO find a way to execute process as root
-    command = "kextload";
+    command = "sudo -S kextload -v /tmp/AppleGraphicsPowerManagement.kext";
     arguments.clear();
-    arguments << "-v" << "/tmp/AppleGraphicsPowerManagement.kext";
     //Execute commande line
     processStatus |= executeProcess(&process,command,arguments);
 
@@ -529,6 +566,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     {
         logger->write("********************* MBP GPU Fix FAILED *********************\n");
     }
+
+    ui->patchButton->setEnabled(false);
 
     return processStatus;
 }

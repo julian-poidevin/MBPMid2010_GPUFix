@@ -23,6 +23,7 @@
 #include <QtXml>
 #include <QDesktopServices>
 #include <QLibrary>
+#include <QInputDialog>
 
 #include "logger.h"
 
@@ -45,7 +46,6 @@ public:
 
 private slots:
     void on_patchButton_clicked();
-
     void on_restoreButton_clicked();
 
     void exit();
@@ -54,6 +54,7 @@ private:
 
     QFile kernelFile;
     Logger *logger;
+    QString password;
 
     QString getMBPModelVersion(void);
     bool isCompatibleVersion(QString modelVersion);
