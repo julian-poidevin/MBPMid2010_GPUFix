@@ -37,11 +37,13 @@ void MainWindow::on_patchButton_clicked()
         //if (answer == QMessageBox::Yes)
         if(1)
         {
+            logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
             loadKernelExtension(&kernelFile);
         }
         else
         {
+            logger->write(" ********** Discarded MBP GPU Fix **********n");
             return;
         }
     }
@@ -69,16 +71,25 @@ void MainWindow::on_restoreButton_clicked()
 bool MainWindow::init()
 {
     bool isInitOk = true;
-
     MainWindow::setWindowTitle (APP_NAME);
+
+    //Initialize logger
+    if (QFile::exists("log.txt"))
+    {
+        QFile::remove("log.txt");
+    }
+    QString fileName = "log.txt";
+    logger = new Logger(this, fileName, this->ui->logWindow);
 
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
         isInitOk = true;
+        logger->write("➔ Compatibility : OK ✓\n");
     }
     else
     {
+        logger->write("➔ Compatibility : NOK ✗\n");
         QMessageBox::information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
         isInitOk = false;
     }
@@ -113,6 +124,8 @@ QString MainWindow::getMBPModelVersion()
     QString MBPModelVersion;
     QProcess process;
 
+    logger->write(" | Checking compatibility\n");
+
     //Execute commande line
     process.start("sysctl -n hw.model");
 
@@ -125,6 +138,8 @@ QString MainWindow::getMBPModelVersion()
     //Remove carriage return ("\n") from string
     MBPModelVersion = MBPModelVersion.simplified();
 
+    logger->write("MBPModelVersion :  " + MBPModelVersion);
+
     return MBPModelVersion;
 }
 
@@ -132,6 +147,8 @@ bool MainWindow::isSIPEnabled(void)
 {
     QString SIPStatus;
     QProcess process;
+
+    logger->write(" | Checking SIP Status\n");
 
     //Execute commande line
     process.start("csrutil status");
@@ -145,10 +162,12 @@ bool MainWindow::isSIPEnabled(void)
 #ifndef WINDOWS
     if(SIPStatus.contains("disable"))
     {
+        logger->write("SIP Disabled\n");
         return false;
     }
     else
     {
+        logger->write("SIP Enabled\n");
         return true;
     }
 #else
@@ -185,6 +204,8 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
                     QDir::NoSymLinks | QDir::Files,
                     QDirIterator::Subdirectories);
 
+    logger->write(" | Searching for AppleGraphicsPowerManagement.kext\n");
+
     //Check if the file was found
     if(it.hasNext())
     {
@@ -204,12 +225,14 @@ bool MainWindow::searchKernelExtensionFile(QFile* kernelExtensionFile)
     if(listOfFiles.length() <= 1 && listOfFiles.length() > 0)
     {
         //qDebug() << "Moins de 1";
+        logger->write("AppleGraphicsPowerManagement.kext found\n");
         kernelExtensionFile->setFileName(listOfFiles.at(0));
         isFileFound = true;
     }
     else
     {
         //qDebug () << "No file was found...";
+        logger->write("AppleGraphicsPowerManagement.kext not found\n");
         isFileFound = false;
     }
 
@@ -290,11 +313,13 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 #define PATCHED_FILE_PATH "C:/temp/PatchedInfo.plist"
 #endif
 
+    logger->write("Copying Info.plist file\n");
 
     //Remove file if already exists
     if (QFile::exists(PATCHED_FILE_PATH))
     {
         QFile::remove(PATCHED_FILE_PATH);
+        logger->write("Previous Info.plist file removed\n");
     }
 
     //Copy file in tmp dir for patch
@@ -303,6 +328,7 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     QFile tmpFile(PATCHED_FILE_PATH);
     if(!tmpFile.open(QIODevice::ReadWrite | QIODevice::Text))
     {
+        logger->write("Could not open Info.plist file\n");
         qDebug() << "Could not open tmp File";
         return;
     }
@@ -348,6 +374,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {""                     , {0,0,4,200}   , FillArray    }
     };
 
+    logger->write("Patching Info.plist\n");
+
     QDomElement currentNode = xmlBOM.firstChildElement("plist");
     QDomElement nextNode;
 
@@ -358,21 +386,25 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         case FindChild:
             nextNode = findElementChild(currentNode,confTree.at(i).nodeName);
             qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
+            logger->write(" - FindChild  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
             break;
 
         case FindSibling:
             nextNode = findElementSibling(currentNode,confTree.at(i).nodeName);
             qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
+            logger->write(" - FindSibling  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
             break;
 
         case NextSibling:
             nextNode = currentNode.nextSiblingElement(confTree.at(i).nodeName);
             qDebug() << "NextSibling - " << nextNode.tagName();
+            logger->write(" - NextSibling  - " + nextNode.tagName() + "\n");
             break;
 
         case FirstChild:
             nextNode = currentNode.firstChildElement(confTree.at(i).nodeName);
             qDebug() << "FirstChild - " << nextNode.tagName();
+            logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
             break;
 
         case FillArray:
@@ -395,6 +427,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         currentNode = nextNode;
     }
 
+    logger->write("Info.plist successfully patched\n");
+
     // Write changes to same file
     tmpFile.resize(0);
     QTextStream stream;
@@ -411,6 +445,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
 
     //Disable srcutils: https://derflounder.wordpress.com/2015/10/05/configuring-system-integrity-protection-without-booting-to-recovery-hd/
 
+    logger->write(" | Loading Kernel Extension\n");
+
     /* Copy real kext into tmp file */
     QProcess process;
     QString command = "cp";
@@ -418,11 +454,15 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     QDir kextDir(kernelFile->fileName());
     kextDir.cdUp();
 
+    logger->write("Copying actuel kext into tmp\n");
+
     arguments << "-rf" << kextDir.absolutePath() << "/tmp/AppleGraphicsPowerManagement.kext";
     //Execute commande line
     process.start(command,arguments);
     //Wait forever until finished
     process.waitForFinished(-1);
+
+    logger->write("Copying patched Info.plist into kext\n");
 
     /*** Copy patched file into kext ***/
     command = "cp";
@@ -432,6 +472,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     process.start(command,arguments);
     //Wait forever until finished
     process.waitForFinished(-1);
+
+    logger->write("Changing permission of kext\n");
 
     /*** Change permission of modified kext File ***/
     //TODO find a way to execute process as root
@@ -444,6 +486,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     process.waitForFinished(-1);
     qDebug() << process.readAllStandardError();
 
+    logger->write("Unloading previous kext\n");
+
     /*** Unload previous kext file ***/
     //TODO find a way to execute process as root
     command = "kextunload";
@@ -454,6 +498,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     //Wait forever until finished
     process.waitForFinished(-1);
     qDebug() << process.readAllStandardError();
+
+    logger->write("Loading modified kext\n");
 
     /*** Finally load kext file ***/
     //TODO find a way to execute process as root
@@ -468,6 +514,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
 
     //See here : http://osxdaily.com/2015/06/24/load-unload-kernel-extensions-mac-os-x/
     int Status = 0;
+
+    if(Status == 0) logger->write("********************* MBP GPU Fixed Successfully *********************\n");
 
     return Status;
 }

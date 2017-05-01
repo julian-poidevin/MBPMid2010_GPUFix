@@ -14,7 +14,7 @@
    <string>MBPMid2010-GPU-Fix</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPlainTextEdit" name="plainTextEdit">
+   <widget class="QPlainTextEdit" name="logWindow">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -22,6 +22,17 @@
       <width>381</width>
       <height>111</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="readOnly">
      <bool>true</bool>

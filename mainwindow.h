@@ -22,6 +22,9 @@
 #include <QList>
 #include <QtXml>
 #include <QDesktopServices>
+#include <QLibrary>
+
+#include "logger.h"
 
 using namespace std; // Indique quel espace de noms on va utiliser
 
@@ -50,6 +53,7 @@ private:
     Ui::MainWindow *ui;
 
     QFile kernelFile;
+    Logger *logger;
 
     QString getMBPModelVersion(void);
     bool isCompatibleVersion(QString modelVersion);
