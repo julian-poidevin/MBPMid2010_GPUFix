@@ -105,6 +105,7 @@ bool MainWindow::init()
         logger->write("➔ Compatibility : NOK ✗\n");
         QMessageBox::information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
         isInitOk = false;
+        return isInitOk;
     }
 
     //Search for SIP Status
