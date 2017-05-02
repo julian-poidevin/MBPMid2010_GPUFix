@@ -1,3 +1,5 @@
+![MBPMid2010_GPUFix](ressource/github_banner.jpg)
+
 # MBPMid2010_GPUFix
 [![Build Status](https://travis-ci.org/julian-poidevin/MBPMid2010_GPUFix.svg?branch=develop)](https://travis-ci.org/julian-poidevin/MBPMid2010_GPUFix)
 [![GitHub issues](https://img.shields.io/github/issues/julian-poidevin/MBPMid2010_GPUFix.svg)](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues)
@@ -7,7 +9,7 @@ MBPMid2010_GPUFix is an utility program that allows to fix [MacBook Pro (15-inch
 
 The utility is based on Qt Framework and only available on OSX.
 
-
+![MBPMid2010_GPUFix](ressource/screenshots/readme_screenshot.jpeg)
 
 ---
 
