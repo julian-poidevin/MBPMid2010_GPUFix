@@ -2,4 +2,9 @@
 
 * First functionnal version
 
+#### Features
+* Implemented log window (#4)
+* Implemented MacBook version recognition (#5)
+* Implemented reading of SIP status (#7)
+
 
