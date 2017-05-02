@@ -33,11 +33,8 @@ void MainWindow::on_patchButton_clicked()
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
-        //TODO : Uncomment
-        //int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
-
-        //if (answer == QMessageBox::Yes)
-        if(1)
+        int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
+        if (answer == QMessageBox::Yes)
         {
             password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
 
