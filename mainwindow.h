@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define VERSION "0.1"
+#define VERSION "0.1.1"
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
@@ -24,6 +24,8 @@
 #include <QDesktopServices>
 #include <QLibrary>
 #include <QInputDialog>
+#include <QLabel>
+#include <QPixmap>
 
 #include "logger.h"
 

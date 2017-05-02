@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>184</height>
+    <height>216</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,6 +68,25 @@
     </property>
     <property name="text">
      <string>Restore Default Config</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="githubIcon">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>180</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>ressource/gitlabicon.png</pixmap>
+    </property>
+    <property name="openExternalLinks">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>

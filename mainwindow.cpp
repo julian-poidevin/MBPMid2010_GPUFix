@@ -91,6 +91,13 @@ bool MainWindow::init()
     logger = new Logger(this, fileName, this->ui->logWindow);
     logger->setShowDateTime(false);
 
+    //Configure GitHub icom
+    QLabel *githubIcon = new QLabel(this->ui->centralWidget);
+    githubIcon->setText("<a href=\"https://github.com/julian-poidevin/MBPMid2010_GPUFix/\">GitHub Link</a>");
+    githubIcon->setTextFormat(Qt::RichText);
+    githubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    githubIcon->setOpenExternalLinks(true);
+
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
