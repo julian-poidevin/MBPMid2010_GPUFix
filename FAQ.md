@@ -1,10 +1,24 @@
 # MBPMid2010_GPUFix F.A.Q.s - Frequently Asked Questions (and Answers)
 
+[The GPU Panic](#the-gpu-panic) • 
 [How does it works ?](#how-does-it-works-) • 
 [System Integrity Protection (SIP)](#system-integrity-protection-sip) • 
 [Getting Help](#getting-help) • 
 [Troubleshooting](#troubleshooting) •
 
+## The GPU Panic
+
+#### Q: What causes my MacBook Pro to restart ?
+At start, the bug is hardware : it's due to a bad type choice on a decoupling capacitor used on GPU motherboard part :
+<img src="http://i.imgur.com/SFQfnWU.jpg" height="300">
+
+It has been detected that the problem happens every time that `G-State` change between 2 to 0.
+
+G-States go from 0 to 3, are related to the thresholds inside `AppleGraphicsPowerManagement.kext`, like this:
+- G-state 0 *(maximum speed)*
+- G-state 3 *(lowest speed)*.
+
+The problem can be solved by keeping it always at `G-State 2` *(medium speed).*
 
 
 ## How does it works ?
