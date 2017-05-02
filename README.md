@@ -21,7 +21,7 @@ Latest version can be downloaded here : [![Downloads](https://img.shields.io/bad
 ## [Change Log](CHANGELOG.md)
 
 ## Idea/Suggestions
-If you have any ideas of suggestion please open an [Issue](https://github.com//julian-poidevin/MBPMid2010_GPUFix/issues)
+If you have any ideas or suggestion please open an [Issue](https://github.com//julian-poidevin/MBPMid2010_GPUFix/issues)
 
 ## [FAQ](FAQ.md)
 Please see [FAQ.md](FAQ.md)
