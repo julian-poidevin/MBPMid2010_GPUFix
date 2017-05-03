@@ -28,6 +28,9 @@ void MainWindow::exit()
 void MainWindow::on_patchButton_clicked()
 {
     bool ok;
+    QProcess process;
+    QString errorOutput;
+    QString command;
 
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
@@ -36,12 +39,26 @@ void MainWindow::on_patchButton_clicked()
         int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
         if (answer == QMessageBox::Yes)
         {
-            password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
-
-            if(!ok || password.isEmpty())
+            do
             {
-                return;
-            }
+                password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
+
+                command = "sudo -S cd";
+                process.start(command);
+
+                process.write(password.toLocal8Bit());
+                process.write("\n");
+                process.waitForFinished(1000);
+                errorOutput = process.readAllStandardError();
+                qDebug() << errorOutput;
+                process.closeWriteChannel();
+
+                if(!ok)
+                {
+                    process.close();
+                    return;
+                }
+            }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
@@ -165,6 +182,9 @@ QString MainWindow::getMBPModelVersion()
     //Get command line output
     MBPModelVersion = process.readAllStandardOutput();
 
+    //Close process
+    process.close();
+
     //Remove carriage return ("\n") from string
     MBPModelVersion = MBPModelVersion.simplified();
 
@@ -188,6 +208,9 @@ bool MainWindow::isSIPEnabled(void)
 
     //Get command line output
     SIPStatus = process.readAllStandardOutput();
+
+    //Close process
+    process.close();
 
 #ifndef WINDOWS
     if(SIPStatus.contains("disable"))
@@ -239,6 +262,9 @@ int MainWindow::executeProcess(QProcess* process, QString command, QStringList a
         errorOutput.clear();
         return -1;
     }
+
+    //Close process
+    process->close();
 }
 
 
@@ -583,6 +609,9 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     {
         logger->write("********************* MBP GPU Fix FAILED *********************\n");
     }
+
+    //Close process
+    process.close();
 
     ui->patchButton->setEnabled(false);
 

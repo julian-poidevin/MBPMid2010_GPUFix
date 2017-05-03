@@ -73,7 +73,7 @@
    <widget class="QPushButton" name="gitHubButton">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>190</x>
       <y>180</y>
       <width>51</width>
       <height>31</height>
