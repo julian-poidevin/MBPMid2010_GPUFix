@@ -33,3 +33,6 @@ HEADERS  += mainwindow.h \
     logger.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    mbpmid2010_gpufix.qrc

@@ -92,11 +92,23 @@ bool MainWindow::init()
     logger->setShowDateTime(false);
 
     //Configure GitHub icom
-    QLabel *githubIcon = new QLabel(this->ui->centralWidget);
-    githubIcon->setText("<a href=\"https://github.com/julian-poidevin/MBPMid2010_GPUFix/\">GitHub Link</a>");
-    githubIcon->setTextFormat(Qt::RichText);
-    githubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    githubIcon->setOpenExternalLinks(true);
+
+
+
+    QString gitHubLogoPath = ":/ressource/githubicon.png";
+    QPixmap pix = QPixmap (gitHubLogoPath);
+    //int width = this->ui->labelgithubIcon->width();
+    //int height = this->ui->labelgithubIcon->height();
+    //pix = pix.scaled(width, height,Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QIcon gitHubButtonIcon(pix);
+    this->ui->gitHubButton->setIcon(gitHubButtonIcon);
+    this->ui->gitHubButton->setIconSize(pix.rect().size());
+    this->ui->gitHubButton->setFixedSize(pix.rect().size());
+    //this->ui->labelgithubIcon->setText("<a href=\"https://github.com/julian-poidevin/MBPMid2010_GPUFix/\">GitHub Link</a>");
+    //this->ui->labelgithubIcon->setTextFormat(Qt::RichText);
+    //this->ui->labelgithubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    //this->ui->labelgithubIcon->setOpenExternalLinks(true);
 
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
@@ -613,4 +625,12 @@ QDomElement MainWindow::findElementSibling(QDomElement parent, const QString &te
     }
 
     return QDomElement();
+}
+
+void MainWindow::on_gitHubButton_clicked()
+{
+    QString link = "https://github.com/julian-poidevin/MBPMid2010_GPUFix";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
 }

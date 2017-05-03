@@ -70,28 +70,31 @@
      <string>Restore Default Config</string>
     </property>
    </widget>
-   <widget class="QLabel" name="githubIcon">
+   <widget class="QPushButton" name="gitHubButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>180</y>
-      <width>31</width>
+      <width>51</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string/>
     </property>
-    <property name="pixmap">
-     <pixmap>ressource/gitlabicon.png</pixmap>
+    <property name="icon">
+     <iconset resource="mbpmid2010_gpufix.qrc">
+      <normaloff>:/ressource/githubicon.png</normaloff>:/ressource/githubicon.png</iconset>
     </property>
-    <property name="openExternalLinks">
-     <bool>false</bool>
+    <property name="flat">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="mbpmid2010_gpufix.qrc"/>
+ </resources>
  <connections/>
 </ui>
