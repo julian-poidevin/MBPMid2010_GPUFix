@@ -1,4 +1,4 @@
-#CHANGELOG
+# CHANGELOG
 ## 0.2.0 (May 4th, 2017)
  
 #### BugFix
