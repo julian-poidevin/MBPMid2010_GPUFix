@@ -28,6 +28,12 @@ void MainWindow::exit()
 void MainWindow::on_patchButton_clicked()
 {
     bool ok;
+    QProcess process;
+    QString errorOutput;
+    QString command;
+    QInputDialog *passwordDialog;
+    passwordDialog = new QInputDialog;
+    QString passwordDialogLabel = "Password :";
 
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
@@ -36,12 +42,31 @@ void MainWindow::on_patchButton_clicked()
         int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
         if (answer == QMessageBox::Yes)
         {
-            password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
-
-            if(!ok || password.isEmpty())
+            do
             {
-                return;
-            }
+                password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
+
+                command = "sudo -S pwd";
+                process.start(command);
+
+                process.write(password.toLocal8Bit());
+                process.write("\n");
+                process.waitForFinished(1000);
+                errorOutput = process.readAllStandardError();
+                qDebug() << errorOutput;
+                process.closeWriteChannel();
+
+                if(errorOutput.contains("try again"))
+                {
+                    passwordDialogLabel="Wrong password, try again.\nPassword :";
+                }
+
+                if(!ok)
+                {
+                    process.close();
+                    return;
+                }
+            }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
@@ -91,6 +116,25 @@ bool MainWindow::init()
     logger = new Logger(this, fileName, this->ui->logWindow);
     logger->setShowDateTime(false);
 
+    //Configure GitHub icom
+
+
+
+    QString gitHubLogoPath = ":/ressource/githubicon.png";
+    QPixmap pix = QPixmap (gitHubLogoPath);
+    //int width = this->ui->labelgithubIcon->width();
+    //int height = this->ui->labelgithubIcon->height();
+    //pix = pix.scaled(width, height,Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QIcon gitHubButtonIcon(pix);
+    this->ui->gitHubButton->setIcon(gitHubButtonIcon);
+    this->ui->gitHubButton->setIconSize(pix.rect().size());
+    this->ui->gitHubButton->setFixedSize(pix.rect().size());
+    //this->ui->labelgithubIcon->setText("<a href=\"https://github.com/julian-poidevin/MBPMid2010_GPUFix/\">GitHub Link</a>");
+    //this->ui->labelgithubIcon->setTextFormat(Qt::RichText);
+    //this->ui->labelgithubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    //this->ui->labelgithubIcon->setOpenExternalLinks(true);
+
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
@@ -102,6 +146,7 @@ bool MainWindow::init()
         logger->write("➔ Compatibility : NOK ✗\n");
         QMessageBox::information(this,"Mac not compatible","Sorry, your Mac is not compatible.\nThe application will close");
         isInitOk = false;
+        return isInitOk;
     }
 
     //Search for SIP Status
@@ -145,6 +190,9 @@ QString MainWindow::getMBPModelVersion()
     //Get command line output
     MBPModelVersion = process.readAllStandardOutput();
 
+    //Close process
+    process.close();
+
     //Remove carriage return ("\n") from string
     MBPModelVersion = MBPModelVersion.simplified();
 
@@ -168,6 +216,9 @@ bool MainWindow::isSIPEnabled(void)
 
     //Get command line output
     SIPStatus = process.readAllStandardOutput();
+
+    //Close process
+    process.close();
 
 #ifndef WINDOWS
     if(SIPStatus.contains("disable"))
@@ -219,6 +270,9 @@ int MainWindow::executeProcess(QProcess* process, QString command, QStringList a
         errorOutput.clear();
         return -1;
     }
+
+    //Close process
+    process->close();
 }
 
 
@@ -564,6 +618,9 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
         logger->write("********************* MBP GPU Fix FAILED *********************\n");
     }
 
+    //Close process
+    process.close();
+
     ui->patchButton->setEnabled(false);
 
     return processStatus;
@@ -605,4 +662,12 @@ QDomElement MainWindow::findElementSibling(QDomElement parent, const QString &te
     }
 
     return QDomElement();
+}
+
+void MainWindow::on_gitHubButton_clicked()
+{
+    QString link = "https://github.com/julian-poidevin/MBPMid2010_GPUFix";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
 }

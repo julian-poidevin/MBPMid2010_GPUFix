@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>184</height>
+    <height>216</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,9 +70,31 @@
      <string>Restore Default Config</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="gitHubButton">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>180</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="mbpmid2010_gpufix.qrc">
+      <normaloff>:/ressource/githubicon.png</normaloff>:/ressource/githubicon.png</iconset>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="mbpmid2010_gpufix.qrc"/>
+ </resources>
  <connections/>
 </ui>
