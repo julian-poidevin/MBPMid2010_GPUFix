@@ -44,6 +44,8 @@ There is no way for an app to modify SIP setting. You have to re-enable it manua
 
 Also, if you activated updates on your Macbook, the patched file will be overwrited and you'll need to run the patch software again. So I would not recommend re-enabling the SIP.
 
+**No need to re-enable SIP to get the patch working though.**
+
 ## Getting Help 
 
 
