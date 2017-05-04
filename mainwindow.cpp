@@ -31,6 +31,9 @@ void MainWindow::on_patchButton_clicked()
     QProcess process;
     QString errorOutput;
     QString command;
+    QInputDialog *passwordDialog;
+    passwordDialog = new QInputDialog;
+    QString passwordDialogLabel = "Password :";
 
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
@@ -41,9 +44,9 @@ void MainWindow::on_patchButton_clicked()
         {
             do
             {
-                password = QInputDialog::getText(this,tr("Password"),tr("Password:"),QLineEdit::Password,"",&ok);
+                password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
 
-                command = "sudo -S cd";
+                command = "sudo -S pwd";
                 process.start(command);
 
                 process.write(password.toLocal8Bit());
@@ -52,6 +55,11 @@ void MainWindow::on_patchButton_clicked()
                 errorOutput = process.readAllStandardError();
                 qDebug() << errorOutput;
                 process.closeWriteChannel();
+
+                if(errorOutput.contains("try again"))
+                {
+                    passwordDialogLabel="Wrong password, try again.\nPassword :";
+                }
 
                 if(!ok)
                 {
