@@ -74,7 +74,7 @@ void MainWindow::on_patchButton_clicked()
         }
         else
         {
-            logger->write(" ********** Discarded MBP GPU Fix **********n");
+            logger->write(" ********** Discarded MBP GPU Fix **********\n");
             return;
         }
     }

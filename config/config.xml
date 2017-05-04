@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>MBPMid2010-GPU-Fix</Name>
+    <Version>1.0.0</Version>
+    <Title>MBPMid2010-GPU-Fix-Installer</Title>
+    <Publisher>Julian POIDEVIN</Publisher>
+    <!-- Directory name is used in component.xml -->
+    <StartMenuDir>MBPMid2010-GPU-Fix</StartMenuDir>
+    <TargetDir>/Applications/MBPMid2010-GPU-Fix/</TargetDir>
+    <RemoteRepositories>
+        <Repository>
+            <Url>http://localhost/repository</Url>
+        </Repository>
+    </RemoteRepositories>
+</Installer>
