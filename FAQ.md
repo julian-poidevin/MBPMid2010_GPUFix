@@ -39,6 +39,10 @@ You can follow this [YouTube tutorial](https://www.youtube.com/watch?v=Wmhal4shm
 #### Q: Why should it be disabled ?
 Patched kernel extension file needs to be reloaded and it can't be reloaded without SIP disabled.
 
+#### Q: Do your app re-enables SIP after patching ?
+There is no way for an app to modify SIP setting. You have to re-enable it manually.
+
+Also, if you activated updates on your Macbook, the patched file will be overwrited and you'll need to run the patch software again. So I would not recommend re-enabling the SIP.
 
 ## Getting Help 
 
