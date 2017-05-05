@@ -31,4 +31,4 @@ If you have any ideas or suggestion please open an [Issue](https://github.com//j
 Please see [FAQ.md](FAQ.md)
 
 ## Credits
-- User [fabioroberto](https://forums.macrumors.com/members/fabioroberto.797465/) from [MacRumors forums](https://forums.macrumors.com)
+- User [fabioroberto](https://forums.macrumors.com/members/fabioroberto.797465/) from [MacRumors forums](https://forums.macrumors.com) for helping me tweaking the application and his kindness
