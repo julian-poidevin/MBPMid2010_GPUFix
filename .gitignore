@@ -32,3 +32,6 @@
 *.user*
 Makefile
 *.qmake*
+build-debug
+build-release
+test
