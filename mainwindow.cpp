@@ -554,7 +554,6 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             removedNode = findElementSibling(currentNode,confTree.at(i).nodeName);
             qDebug() << currentNode.parentNode().toElement().tagName();
             currentNode.removeChild(removedNode);
-
             break;
 
         default:
