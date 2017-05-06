@@ -39,12 +39,15 @@ void MainWindow::on_patchButton_clicked()
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
-        int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
-        if (answer == QMessageBox::Yes)
+        //int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
+        int answer = QMessageBox::Yes;
+        if(1)
         {
             do
             {
-                password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
+                //password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
+                password = "beqtn5mf";
+                ok = 1;
 
                 command = "sudo -S pwd";
                 process.start(command);
@@ -58,6 +61,7 @@ void MainWindow::on_patchButton_clicked()
 
                 if(errorOutput.contains("try again"))
                 {
+                    qDebug() << "Wrong password, try again.\n";
                     passwordDialogLabel="Wrong password, try again.\nPassword :";
                 }
 
@@ -70,7 +74,7 @@ void MainWindow::on_patchButton_clicked()
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
-            loadKernelExtension(&kernelFile);
+            //loadKernelExtension(&kernelFile);
         }
         else
         {
@@ -446,7 +450,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         FindSibling,
         NextSibling,
         FirstChild,
-        FillArray
+        ModifyIntValue,
+        FillArray,
+        Test,
     }EActions;
 
     typedef struct{
@@ -456,22 +462,24 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     }nodeTree;
 
     QVector<nodeTree> confTree={
-        {"MacBookPro6,2"        , {}            , FindChild    },
-        {"dict"                 , {}            , NextSibling  },
-        {"Vendor10deDevice0a29" , {}            , FindChild    },
-        {"BoostPState"          , {}            , FindSibling  },
-        {""                     , {2,2,2,2}     , FillArray    },
-        {"BoostTime"            , {}            , FindSibling  },
-        {""                     , {2,2,2,2}     , FillArray    },
-        {"Heuristic"            , {}            , FindSibling  },
-        {"Threshold_High"       , {}            , FindSibling  },
-        {""                     , {0,0,100,200} , FillArray    },
-        {"Threshold_High_v"     , {}            , FindSibling  },
-        {""                     , {0,0,98,100}  , FillArray    },
-        {"Threshold_Low"        , {}            , FindSibling  },
-        {""                     , {0,0,0,200}   , FillArray    },
-        {"Threshold_Low_v"      , {}            , FindSibling  },
-        {""                     , {0,0,4,200}   , FillArray    }
+        {"MacBookPro6,2"        , {}            , FindChild      },
+        {"dict"                 , {}            , NextSibling    },
+        {"LogControl"           , {}            , FindChild      },
+        {""                     , {1}           , ModifyIntValue },
+        {"Vendor10deDevice0a29" , {}            , Test           },
+        {"BoostPState"          , {}            , FindSibling    },
+        {""                     , {2,2,2,2}     , FillArray      },
+        {"BoostTime"            , {}            , FindSibling    },
+        {""                     , {2,2,2,2}     , FillArray      },
+        {"Heuristic"            , {}            , FindSibling    },
+        {"Threshold_High"       , {}            , FindSibling    },
+        {""                     , {0,0,100,200} , FillArray      },
+        {"Threshold_High_v"     , {}            , FindSibling    },
+        {""                     , {0,0,98,100}  , FillArray      },
+        {"Threshold_Low"        , {}            , FindSibling    },
+        {""                     , {0,0,0,200}   , FillArray      },
+        {"Threshold_Low_v"      , {}            , FindSibling    },
+        {""                     , {0,0,4,200}   , FillArray      }
     };
 
     logger->write("Patching Info.plist\n");
@@ -505,6 +513,17 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             nextNode = currentNode.firstChildElement(confTree.at(i).nodeName);
             qDebug() << "FirstChild - " << nextNode.tagName();
             logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
+            break;
+
+        case ModifyIntValue:
+            currentNode = currentNode.nextSiblingElement("integer");
+            qDebug() << "ModifyIntValue - " << currentNode.tagName();
+            logger->write(" - ModifyIntValue  - " + currentNode.tagName() + "\n");
+
+            currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+            qDebug() << "Integer - " << currentNode.firstChild().nodeValue();
+            logger->write(" - Integer  - " + currentNode.firstChild().nodeValue() + "\n");
+
             break;
 
         case FillArray:
