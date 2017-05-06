@@ -9,6 +9,8 @@ MBPMid2010_GPUFix is an utility program that allows to fix [MacBook Pro (15-inch
 
 The utility is based on Qt Framework and only available on OSX.
 
+**APP HAS TO BE RUN AFTER EVERY NEW SOFTWARE UPDATE ON YOUR MAC**
+
 ![MBPMid2010_GPUFix](ressource/screenshots/readme_screenshot.jpeg)
 
 ---
