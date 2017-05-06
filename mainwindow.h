@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define VERSION "0.2.0"
+#define VERSION "0.3.0"
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
@@ -64,7 +64,7 @@ private:
     bool isCompatibleVersion(QString modelVersion);
     bool searchKernelExtensionFile(QFile* kernelExtensionFile);
     void backupOldKernelExtension(void);
-    void patchKernelExtensionFile(QFile* kernelFile);
+    bool patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);
     int restoreOldKernelExtension(QFile* kernelFile);
     QDomElement findElementChild(QDomElement parent, const QString &textToFind);

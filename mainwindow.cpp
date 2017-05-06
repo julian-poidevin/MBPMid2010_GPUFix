@@ -34,16 +34,22 @@ void MainWindow::on_patchButton_clicked()
     QInputDialog *passwordDialog;
     passwordDialog = new QInputDialog;
     QString passwordDialogLabel = "Password :";
+    bool isErrorPatching=false;
 
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
+#ifndef TEST
         int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
-        if (answer == QMessageBox::Yes)
+        if(answer == QMessageBox::Yes)
+#else
+        if(1)
+#endif
         {
             do
             {
+#ifndef TEST
                 password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
 
                 command = "sudo -S pwd";
@@ -58,8 +64,12 @@ void MainWindow::on_patchButton_clicked()
 
                 if(errorOutput.contains("try again"))
                 {
+                    qDebug() << "Wrong password, try again.\n";
                     passwordDialogLabel="Wrong password, try again.\nPassword :";
                 }
+#else
+                ok = 1;
+#endif
 
                 if(!ok)
                 {
@@ -69,8 +79,17 @@ void MainWindow::on_patchButton_clicked()
             }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
-            patchKernelExtensionFile(&kernelFile);
-            loadKernelExtension(&kernelFile);
+            isErrorPatching = patchKernelExtensionFile(&kernelFile);
+#ifndef TEST
+            if(isErrorPatching == false)
+            {
+                loadKernelExtension(&kernelFile);
+            }
+            else
+            {
+                logger->write("********************* MBP GPU Fix FAILED *********************\n");
+            }
+#endif
         }
         else
         {
@@ -393,16 +412,8 @@ void MainWindow::backupOldKernelExtension()
     QFile::copy(kernelFile.fileName(), kernelFile.fileName() + ".bak");
 }
 
-void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
+bool MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 {
-    //Modify Kernel Extension File to add fix explained here :
-    //https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/
-    //Use QSettings ? : http://doc.qt.io/qt-5/qsettings.html
-    //https://openclassrooms.com/courses/enregistrer-vos-options-avec-qsettings
-    //http://stackoverflow.com/questions/20240511/qsettings-mac-and-plist-files
-    //https://forum.qt.io/topic/37247/qsettings-with-systemscope-not-saving-plist-file-in-os-x-mavericks/6
-
-
     //TODO
     //backupOldKernelExtension();
 
@@ -412,6 +423,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 #ifdef WINDOWS
 #define PATCHED_FILE_PATH "C:/temp/PatchedInfo.plist"
 #endif
+
+    bool isErrorPatching = false;
 
     logger->write("Copying Info.plist file\n");
 
@@ -430,7 +443,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     {
         logger->write("Could not open Info.plist file\n");
         qDebug() << "Could not open tmp File";
-        return;
+        isErrorPatching = true;
+        return isErrorPatching;
     }
 
     //The QDomDocument class represents an XML document.
@@ -446,7 +460,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         FindSibling,
         NextSibling,
         FirstChild,
-        FillArray
+        ModifyIntValue,
+        FillArray,
+        RemoveSibling,
     }EActions;
 
     typedef struct{
@@ -456,67 +472,176 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     }nodeTree;
 
     QVector<nodeTree> confTree={
-        {"MacBookPro6,2"        , {}            , FindChild    },
-        {"dict"                 , {}            , NextSibling  },
-        {"Vendor10deDevice0a29" , {}            , FindChild    },
-        {"BoostPState"          , {}            , FindSibling  },
-        {""                     , {2,2,2,2}     , FillArray    },
-        {"BoostTime"            , {}            , FindSibling  },
-        {""                     , {2,2,2,2}     , FillArray    },
-        {"Heuristic"            , {}            , FindSibling  },
-        {"Threshold_High"       , {}            , FindSibling  },
-        {""                     , {0,0,100,200} , FillArray    },
-        {"Threshold_High_v"     , {}            , FindSibling  },
-        {""                     , {0,0,98,100}  , FillArray    },
-        {"Threshold_Low"        , {}            , FindSibling  },
-        {""                     , {0,0,0,200}   , FillArray    },
-        {"Threshold_Low_v"      , {}            , FindSibling  },
-        {""                     , {0,0,4,200}   , FillArray    }
+        {"MacBookPro6,2"        , {}            , FindChild      },
+        {"dict"                 , {}            , NextSibling    },
+        {"LogControl"           , {}            , FindChild      },
+        {""                     , {1}           , ModifyIntValue },
+        {"Vendor10deDevice0a29" , {}            , FindSibling    },
+        {"BoostPState"          , {}            , FindSibling    },
+        {""                     , {2,2,2,2}     , FillArray      },
+        {"BoostTime"            , {}            , FindSibling    },
+        {""                     , {2,2,2,2}     , FillArray      },
+        {"Heuristic"            , {}            , FindSibling    },
+        {"IdleInterval"         , {}            , FindSibling    },
+        {""                     , {10}          , ModifyIntValue },
+        {"P3HistoryLength"      , {}            , RemoveSibling  },
+        {"SensorSampleRate"     , {}            , FindSibling    },
+        {""                     , {10}          , ModifyIntValue },
+        {"Threshold_High"       , {}            , FindSibling    },
+        {""                     , {0,0,100,200} , FillArray      },
+        {"Threshold_High_v"     , {}            , FindSibling    },
+        {""                     , {0,0,98,100}  , FillArray      },
+        {"Threshold_Low"        , {}            , FindSibling    },
+        {""                     , {0,0,0,200}   , FillArray      },
+        {"Threshold_Low_v"      , {}            , FindSibling    },
+        {""                     , {0,0,4,200}   , FillArray      }
     };
 
     logger->write("Patching Info.plist\n");
 
     QDomElement currentNode = xmlBOM.firstChildElement("plist");
     QDomElement nextNode;
+    QDomElement removedNode;
 
-    for (int i = 0; i < confTree.size(); ++i)
+    for (int i = 0;(i < confTree.size()) && (isErrorPatching == false); ++i)
     {
         //qDebug() << confTree.at(i).nodeName << confTree.at(i).ActionToPerform;
         switch (confTree.at(i).ActionToPerform){
         case FindChild:
             nextNode = findElementChild(currentNode,confTree.at(i).nodeName);
-            qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
-            logger->write(" - FindChild  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - FindChild  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "FindChild - ERROR \n";
+                logger->write(" - FindChild  - ERROR \n");
+            }
             break;
 
         case FindSibling:
             nextNode = findElementSibling(currentNode,confTree.at(i).nodeName);
-            qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
-            logger->write(" - FindSibling  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - FindSibling  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "FindSibling - ERROR \n";
+                logger->write(" - FindSibling  - ERROR \n");
+            }
             break;
 
         case NextSibling:
             nextNode = currentNode.nextSiblingElement(confTree.at(i).nodeName);
-            qDebug() << "NextSibling - " << nextNode.tagName();
-            logger->write(" - NextSibling  - " + nextNode.tagName() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "NextSibling - " << nextNode.tagName();
+                logger->write(" - NextSibling  - " + nextNode.tagName() + "\n");
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "NextSibling - ERROR \n";
+                logger->write(" - NextSibling  - ERROR \n");
+            }
             break;
 
         case FirstChild:
             nextNode = currentNode.firstChildElement(confTree.at(i).nodeName);
-            qDebug() << "FirstChild - " << nextNode.tagName();
-            logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FirstChild - " << nextNode.tagName();
+                logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "FirstChild - ERROR \n";
+                logger->write(" - FirstChild  - ERROR \n");
+            }
+            break;
+
+        case ModifyIntValue:
+            currentNode = currentNode.nextSiblingElement("integer");
+
+            if(!currentNode.isNull())
+            {
+                currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+                //qDebug() << "Integer - " << currentNode.firstChild().nodeValue();
+                //logger->write(" - Integer  - " + currentNode.firstChild().nodeValue() + "\n");
+
+                nextNode = currentNode;
+
+                qDebug() << "ModifyIntValue - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - ModifyIntValue  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "ModifyIntValue - ERROR \n";
+                logger->write(" - ModifyIntValue  - ERROR \n");
+            }
+
             break;
 
         case FillArray:
 
             currentNode = currentNode.nextSiblingElement("array").firstChildElement("integer");
 
-            currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
-            currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
-            currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
-            currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
+            if(!currentNode.isNull())
+            {
+                currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+                currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
+                currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
+                currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
 
-            nextNode = currentNode.parentNode().toElement();
+                nextNode = currentNode.parentNode().toElement();
+            }
+            else
+            {
+                isErrorPatching = true;
+                qDebug() << "FillArray - ERROR \n";
+                logger->write(" - FillArray  - ERROR \n");
+            }
+
+            break;
+
+        case RemoveSibling:
+            removedNode = findElementSibling(currentNode,confTree.at(i).nodeName);
+
+            if(!removedNode.isNull())
+            {
+                qDebug() << "RemoveSiblingLabel - " << removedNode.tagName() << "|" << removedNode.text();
+                logger->write(" - RemoveSiblingLabel  - " + removedNode.tagName() + "|" + removedNode.text() + "\n");
+
+                currentNode.parentNode().removeChild(removedNode);
+
+                removedNode = currentNode.nextSiblingElement("integer");
+
+                if(!removedNode.isNull())
+                {
+                    qDebug() << "RemoveSiblingValue - " << removedNode.tagName() << "|" << removedNode.text();
+                    logger->write(" - RemoveSiblingValue  - " + removedNode.tagName() + "|" + removedNode.text() + "\n");
+
+                    currentNode.parentNode().removeChild(removedNode);
+                }
+                else
+                {
+                    qDebug() << "RemoveSiblingValue - Not found";
+                    logger->write(" - RemoveSiblingValue  - Not found");
+                }
+            }
+            else
+            {
+                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found \n";
+                logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found \n");
+            }
 
             break;
 
@@ -527,15 +652,24 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         currentNode = nextNode;
     }
 
-    logger->write("Info.plist successfully patched\n");
+    if(isErrorPatching != true)
+    {
+        logger->write("Info.plist successfully patched\n");
 
-    // Write changes to same file
-    tmpFile.resize(0);
-    QTextStream stream;
-    stream.setDevice(&tmpFile);
-    xmlBOM.save(stream, 4);
+        // Write changes to same file
+        tmpFile.resize(0);
+        QTextStream stream;
+        stream.setDevice(&tmpFile);
+        xmlBOM.save(stream, 4);
+    }
+    else
+    {
+        logger->write("Info.plist patching failed\n");
+    }
 
     tmpFile.close();
+
+    return isErrorPatching;
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)
