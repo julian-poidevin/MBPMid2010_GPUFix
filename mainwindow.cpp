@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#define TEST
-//#define REAL
+//#define TEST
+#define REAL
 
 //#define WINDOWS
 #define MAC
@@ -41,7 +41,7 @@ void MainWindow::on_patchButton_clicked()
         //Display Warning Message
 #ifndef TEST
         int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
-        int answer = QMessageBox::Yes;
+        if(answer == QMessageBox::Yes)
 #else
         if(1)
 #endif
@@ -79,7 +79,9 @@ void MainWindow::on_patchButton_clicked()
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             patchKernelExtensionFile(&kernelFile);
-            //loadKernelExtension(&kernelFile);
+#ifndef TEST
+            loadKernelExtension(&kernelFile);
+#endif
         }
         else
         {
@@ -504,36 +506,79 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         switch (confTree.at(i).ActionToPerform){
         case FindChild:
             nextNode = findElementChild(currentNode,confTree.at(i).nodeName);
-            qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
-            logger->write(" - FindChild  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FindChild - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - FindChild  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                qDebug() << "FindChild - ERROR";
+                logger->write(" - FindChild  - ERROR");
+            }
             break;
 
         case FindSibling:
             nextNode = findElementSibling(currentNode,confTree.at(i).nodeName);
-            qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
-            logger->write(" - FindSibling  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FindSibling - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - FindSibling  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                qDebug() << "FindSibling - ERROR";
+                logger->write(" - FindSibling  - ERROR");
+            }
             break;
 
         case NextSibling:
             nextNode = currentNode.nextSiblingElement(confTree.at(i).nodeName);
-            qDebug() << "NextSibling - " << nextNode.tagName();
-            logger->write(" - NextSibling  - " + nextNode.tagName() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "NextSibling - " << nextNode.tagName();
+                logger->write(" - NextSibling  - " + nextNode.tagName() + "\n");
+            }
+            else
+            {
+                qDebug() << "NextSibling - ERROR";
+                logger->write(" - NextSibling  - ERROR");
+            }
             break;
 
         case FirstChild:
             nextNode = currentNode.firstChildElement(confTree.at(i).nodeName);
-            qDebug() << "FirstChild - " << nextNode.tagName();
-            logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
+            if(!nextNode.isNull())
+            {
+                qDebug() << "FirstChild - " << nextNode.tagName();
+                logger->write(" - FirstChild  - " + nextNode.tagName() + "\n");
+            }
+            else
+            {
+                qDebug() << "FirstChild - ERROR";
+                logger->write(" - FirstChild  - ERROR");
+            }
             break;
 
         case ModifyIntValue:
             currentNode = currentNode.nextSiblingElement("integer");
-            qDebug() << "ModifyIntValue - " << currentNode.tagName();
-            logger->write(" - ModifyIntValue  - " + currentNode.tagName() + "\n");
 
-            currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
-            qDebug() << "Integer - " << currentNode.firstChild().nodeValue();
-            logger->write(" - Integer  - " + currentNode.firstChild().nodeValue() + "\n");
+            if(!currentNode.isNull())
+            {
+                currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+                //qDebug() << "Integer - " << currentNode.firstChild().nodeValue();
+                //logger->write(" - Integer  - " + currentNode.firstChild().nodeValue() + "\n");
+
+                nextNode = currentNode;
+
+                qDebug() << "ModifyIntValue - " << nextNode.tagName() << "|" << nextNode.text();
+                logger->write(" - ModifyIntValue  - " + nextNode.tagName() + "|" + nextNode.text() + "\n");
+            }
+            else
+            {
+                qDebug() << "ModifyIntValue - ERROR";
+                logger->write(" - ModifyIntValue  - ERROR");
+            }
 
             break;
 
@@ -541,19 +586,54 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 
             currentNode = currentNode.nextSiblingElement("array").firstChildElement("integer");
 
-            currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
-            currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
-            currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
-            currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
+            if(!currentNode.isNull())
+            {
+                currentNode.firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[0]));
+                currentNode.nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[1]));
+                currentNode.nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[2]));
+                currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
 
-            nextNode = currentNode.parentNode().toElement();
+                nextNode = currentNode.parentNode().toElement();
+            }
+            else
+            {
+                qDebug() << "FillArray - ERROR";
+                logger->write(" - FillArray  - ERROR");
+            }
 
             break;
 
         case RemoveSibling:
             removedNode = findElementSibling(currentNode,confTree.at(i).nodeName);
-            qDebug() << currentNode.parentNode().toElement().tagName();
-            currentNode.removeChild(removedNode);
+
+            if(!removedNode.isNull())
+            {
+                qDebug() << "RemoveSiblingLabel - " << removedNode.tagName() << "|" << removedNode.text();
+                logger->write(" - RemoveSiblingLabel  - " + removedNode.tagName() + "|" + removedNode.text() + "\n");
+
+                currentNode.parentNode().removeChild(removedNode);
+
+                removedNode = currentNode.nextSiblingElement("integer");
+
+                if(!removedNode.isNull())
+                {
+                    qDebug() << "RemoveSiblingValue - " << removedNode.tagName() << "|" << removedNode.text();
+                    logger->write(" - RemoveSiblingValue  - " + removedNode.tagName() + "|" + removedNode.text() + "\n");
+
+                    currentNode.parentNode().removeChild(removedNode);
+                }
+                else
+                {
+                    qDebug() << "RemoveSiblingValue - Not found";
+                    logger->write(" - RemoveSiblingValue  - Not found");
+                }
+            }
+            else
+            {
+                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found";
+                logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found");
+            }
+
             break;
 
         default:
