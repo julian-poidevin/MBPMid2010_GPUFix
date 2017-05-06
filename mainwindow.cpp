@@ -34,6 +34,7 @@ void MainWindow::on_patchButton_clicked()
     QInputDialog *passwordDialog;
     passwordDialog = new QInputDialog;
     QString passwordDialogLabel = "Password :";
+    bool isErrorPatching=false;
 
     //Search kext file
     if(searchKernelExtensionFile(&kernelFile))
@@ -78,9 +79,16 @@ void MainWindow::on_patchButton_clicked()
             }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
-            patchKernelExtensionFile(&kernelFile);
+            isErrorPatching = patchKernelExtensionFile(&kernelFile);
 #ifndef TEST
-            loadKernelExtension(&kernelFile);
+            if(isErrorPatching == false)
+            {
+                loadKernelExtension(&kernelFile);
+            }
+            else
+            {
+                logger->write("********************* MBP GPU Fix FAILED *********************\n");
+            }
 #endif
         }
         else
@@ -404,16 +412,8 @@ void MainWindow::backupOldKernelExtension()
     QFile::copy(kernelFile.fileName(), kernelFile.fileName() + ".bak");
 }
 
-void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
+bool MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 {
-    //Modify Kernel Extension File to add fix explained here :
-    //https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/
-    //Use QSettings ? : http://doc.qt.io/qt-5/qsettings.html
-    //https://openclassrooms.com/courses/enregistrer-vos-options-avec-qsettings
-    //http://stackoverflow.com/questions/20240511/qsettings-mac-and-plist-files
-    //https://forum.qt.io/topic/37247/qsettings-with-systemscope-not-saving-plist-file-in-os-x-mavericks/6
-
-
     //TODO
     //backupOldKernelExtension();
 
@@ -423,6 +423,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 #ifdef WINDOWS
 #define PATCHED_FILE_PATH "C:/temp/PatchedInfo.plist"
 #endif
+
+    bool isErrorPatching = false;
 
     logger->write("Copying Info.plist file\n");
 
@@ -441,7 +443,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     {
         logger->write("Could not open Info.plist file\n");
         qDebug() << "Could not open tmp File";
-        return;
+        isErrorPatching = true;
+        return isErrorPatching;
     }
 
     //The QDomDocument class represents an XML document.
@@ -500,7 +503,7 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
     QDomElement nextNode;
     QDomElement removedNode;
 
-    for (int i = 0; i < confTree.size(); ++i)
+    for (int i = 0;(i < confTree.size()) && (isErrorPatching == false); ++i)
     {
         //qDebug() << confTree.at(i).nodeName << confTree.at(i).ActionToPerform;
         switch (confTree.at(i).ActionToPerform){
@@ -513,8 +516,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "FindChild - ERROR";
-                logger->write(" - FindChild  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "FindChild - ERROR \n";
+                logger->write(" - FindChild  - ERROR \n");
             }
             break;
 
@@ -527,8 +531,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "FindSibling - ERROR";
-                logger->write(" - FindSibling  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "FindSibling - ERROR \n";
+                logger->write(" - FindSibling  - ERROR \n");
             }
             break;
 
@@ -541,8 +546,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "NextSibling - ERROR";
-                logger->write(" - NextSibling  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "NextSibling - ERROR \n";
+                logger->write(" - NextSibling  - ERROR \n");
             }
             break;
 
@@ -555,8 +561,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "FirstChild - ERROR";
-                logger->write(" - FirstChild  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "FirstChild - ERROR \n";
+                logger->write(" - FirstChild  - ERROR \n");
             }
             break;
 
@@ -576,8 +583,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "ModifyIntValue - ERROR";
-                logger->write(" - ModifyIntValue  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "ModifyIntValue - ERROR \n";
+                logger->write(" - ModifyIntValue  - ERROR \n");
             }
 
             break;
@@ -597,8 +605,9 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "FillArray - ERROR";
-                logger->write(" - FillArray  - ERROR");
+                isErrorPatching = true;
+                qDebug() << "FillArray - ERROR \n";
+                logger->write(" - FillArray  - ERROR \n");
             }
 
             break;
@@ -630,8 +639,8 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found";
-                logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found");
+                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found \n";
+                logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found \n");
             }
 
             break;
@@ -643,15 +652,24 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         currentNode = nextNode;
     }
 
-    logger->write("Info.plist successfully patched\n");
+    if(isErrorPatching != true)
+    {
+        logger->write("Info.plist successfully patched\n");
 
-    // Write changes to same file
-    tmpFile.resize(0);
-    QTextStream stream;
-    stream.setDevice(&tmpFile);
-    xmlBOM.save(stream, 4);
+        // Write changes to same file
+        tmpFile.resize(0);
+        QTextStream stream;
+        stream.setDevice(&tmpFile);
+        xmlBOM.save(stream, 4);
+    }
+    else
+    {
+        logger->write("Info.plist patching failed\n");
+    }
 
     tmpFile.close();
+
+    return isErrorPatching;
 }
 
 int MainWindow::loadKernelExtension(QFile *kernelFile)

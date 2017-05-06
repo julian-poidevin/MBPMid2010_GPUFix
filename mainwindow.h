@@ -64,7 +64,7 @@ private:
     bool isCompatibleVersion(QString modelVersion);
     bool searchKernelExtensionFile(QFile* kernelExtensionFile);
     void backupOldKernelExtension(void);
-    void patchKernelExtensionFile(QFile* kernelFile);
+    bool patchKernelExtensionFile(QFile* kernelFile);
     int loadKernelExtension(QFile* kernelFile);
     int restoreOldKernelExtension(QFile* kernelFile);
     QDomElement findElementChild(QDomElement parent, const QString &textToFind);
