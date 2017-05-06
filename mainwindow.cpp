@@ -639,7 +639,7 @@ bool MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found \n";
+                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found";
                 logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found \n");
             }
 
