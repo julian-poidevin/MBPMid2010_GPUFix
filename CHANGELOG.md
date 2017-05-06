@@ -1,6 +1,10 @@
 # CHANGELOG
+## 0.3.0 (May 6th, 2017)
+#### Features
+* Now scanning for error while patching and avoid loading when patching failed ([#15](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/15))
+* Improved modification of kext file ([#16](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/16))
+
 ## 0.2.0 (May 4th, 2017)
- 
 #### BugFix
 * SIP window does not show anymore if Mac not compatible ([#13](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/13))
 * Restored warning pop-up before patching ([#10](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/10))
