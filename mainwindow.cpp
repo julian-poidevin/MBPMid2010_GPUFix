@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//#define TEST
-#define REAL
+#define TEST
+//#define REAL
 
 //#define WINDOWS
 #define MAC
@@ -39,15 +39,17 @@ void MainWindow::on_patchButton_clicked()
     if(searchKernelExtensionFile(&kernelFile))
     {
         //Display Warning Message
-        //int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
+#ifndef TEST
+        int answer = QMessageBox::question(this, "Warning", "This will patch the kernel configuration file.\nAre you sure you want to procede ?", QMessageBox::Yes | QMessageBox::No);
         int answer = QMessageBox::Yes;
+#else
         if(1)
+#endif
         {
             do
             {
-                //password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
-                password = "beqtn5mf";
-                ok = 1;
+#ifndef TEST
+                password = passwordDialog->getText(this,tr("Password"),passwordDialogLabel,QLineEdit::Password,"",&ok);
 
                 command = "sudo -S pwd";
                 process.start(command);
@@ -64,6 +66,9 @@ void MainWindow::on_patchButton_clicked()
                     qDebug() << "Wrong password, try again.\n";
                     passwordDialogLabel="Wrong password, try again.\nPassword :";
                 }
+#else
+                ok = 1;
+#endif
 
                 if(!ok)
                 {
@@ -452,7 +457,7 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         FirstChild,
         ModifyIntValue,
         FillArray,
-        Test,
+        RemoveSibling,
     }EActions;
 
     typedef struct{
@@ -466,12 +471,17 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
         {"dict"                 , {}            , NextSibling    },
         {"LogControl"           , {}            , FindChild      },
         {""                     , {1}           , ModifyIntValue },
-        {"Vendor10deDevice0a29" , {}            , Test           },
+        {"Vendor10deDevice0a29" , {}            , FindSibling    },
         {"BoostPState"          , {}            , FindSibling    },
         {""                     , {2,2,2,2}     , FillArray      },
         {"BoostTime"            , {}            , FindSibling    },
         {""                     , {2,2,2,2}     , FillArray      },
         {"Heuristic"            , {}            , FindSibling    },
+        {"IdleInterval"         , {}            , FindSibling    },
+        {""                     , {10}          , ModifyIntValue },
+        {"P3HistoryLength"      , {}            , RemoveSibling  },
+        {"SensorSampleRate"     , {}            , FindSibling    },
+        {""                     , {10}          , ModifyIntValue },
         {"Threshold_High"       , {}            , FindSibling    },
         {""                     , {0,0,100,200} , FillArray      },
         {"Threshold_High_v"     , {}            , FindSibling    },
@@ -486,6 +496,7 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
 
     QDomElement currentNode = xmlBOM.firstChildElement("plist");
     QDomElement nextNode;
+    QDomElement removedNode;
 
     for (int i = 0; i < confTree.size(); ++i)
     {
@@ -536,6 +547,13 @@ void MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             currentNode.nextSibling().nextSibling().nextSibling().firstChild().setNodeValue(QString::number(confTree.at(i).ArrayValues[3]));
 
             nextNode = currentNode.parentNode().toElement();
+
+            break;
+
+        case RemoveSibling:
+            removedNode = findElementSibling(currentNode,confTree.at(i).nodeName);
+            qDebug() << currentNode.parentNode().toElement().tagName();
+            currentNode.removeChild(removedNode);
 
             break;
 
