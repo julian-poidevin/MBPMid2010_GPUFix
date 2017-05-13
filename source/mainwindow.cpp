@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <updatebutton.h>
 
 //#define TEST
 #define REAL
@@ -9,7 +10,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    controller(nullptr)
 {
     ui->setupUi(this);
 }
@@ -104,6 +106,25 @@ bool MainWindow::init()
     bool isInitOk = true;
     MainWindow::setWindowTitle (APP_NAME);
 
+    //Initialise controller
+    controller = new QtAutoUpdater::UpdateController("/Applications/MBPMid2010_GPU_Fix/MaintenanceTool", this, qApp);
+
+    if(controller) {
+        controller->setParentWindow(this);
+    }
+    controller->setDetailedUpdateInfo(true);
+    QAction *a = controller->createUpdateAction(this);
+    a->setIconVisibleInMenu(false);
+    ui->menuHelp->addAction(a);
+    //ui->mainToolBar->addAction(a);
+    qDebug() << "detected runAsAdmin as:" << controller->runAsAdmin();
+
+    QMenu *dockMenu = new QMenu(this);
+    QAction *action = controller->createUpdateAction(this);
+    action->setMenuRole(QAction::NoRole);
+    dockMenu->addAction(action);
+    qt_mac_set_dock_menu(dockMenu);
+
     //TODO : enable button when functionnality will be avaible
     ui->restoreButton->setEnabled(false);
 
@@ -116,9 +137,7 @@ bool MainWindow::init()
     logger = new Logger(this, fileName, this->ui->logWindow);
     logger->setShowDateTime(false);
 
-    //Configure GitHub icom
-
-
+    //Configure GitHub icon
 
     QString gitHubLogoPath = ":/ressource/githubicon.png";
     QPixmap pix = QPixmap (gitHubLogoPath);
@@ -128,8 +147,8 @@ bool MainWindow::init()
 
     QIcon gitHubButtonIcon(pix);
     this->ui->gitHubButton->setIcon(gitHubButtonIcon);
-    this->ui->gitHubButton->setIconSize(pix.rect().size());
-    this->ui->gitHubButton->setFixedSize(pix.rect().size());
+    //this->ui->gitHubButton->setIconSize(pix.rect().size());
+    //this->ui->gitHubButton->setFixedSize(pix.rect().size());
     //this->ui->labelgithubIcon->setText("<a href=\"https://github.com/julian-poidevin/MBPMid2010_GPUFix/\">GitHub Link</a>");
     //this->ui->labelgithubIcon->setTextFormat(Qt::RichText);
     //this->ui->labelgithubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -670,4 +689,12 @@ void MainWindow::on_gitHubButton_clicked()
     QDesktopServices::openUrl(QUrl(link));
 
     return;
+}
+
+void MainWindow::on_checkUpdatesButton_clicked()
+{
+    if(!controller->isRunning()){
+        controller->setRunAsAdmin(true,true);
+        qDebug() << "start controller:" << controller->start((QtAutoUpdater::UpdateController::DisplayLevel::InfoLevel));
+    }
 }

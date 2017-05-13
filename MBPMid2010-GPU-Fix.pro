@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui xml autoupdatergui
+CONFIG += C++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -43,4 +44,13 @@ FORMS    += mainwindow.ui
 
 RESOURCES += \
     mbpmid2010_gpufix.qrc
+
+unix:!mac {
+        LIBS += -L$$[QT_INSTALL_LIBS] -licudata
+        LIBS += -L$$[QT_INSTALL_LIBS] -licui18n
+        LIBS += -L$$[QT_INSTALL_LIBS] -licuuc
+}
+
+#add lib dir to rpath
+mac: QMAKE_LFLAGS += '-Wl,-rpath,\'$$OUT_PWD/../../../lib\''
 

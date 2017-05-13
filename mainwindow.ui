@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>216</height>
+    <height>217</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,8 +73,8 @@
    <widget class="QPushButton" name="gitHubButton">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>180</y>
+      <x>174</x>
+      <y>179</y>
       <width>51</width>
       <height>31</height>
      </rect>
@@ -86,10 +86,32 @@
      <iconset resource="mbpmid2010_gpufix.qrc">
       <normaloff>:/ressource/githubicon.png</normaloff>:/ressource/githubicon.png</iconset>
     </property>
+    <property name="iconSize">
+     <size>
+      <width>25</width>
+      <height>25</height>
+     </size>
+    </property>
     <property name="flat">
      <bool>true</bool>
     </property>
    </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Check For Updates</string>
+    </property>
+   </widget>
+   <addaction name="menuHelp"/>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

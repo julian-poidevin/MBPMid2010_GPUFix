@@ -26,8 +26,11 @@
 #include <QInputDialog>
 #include <QLabel>
 #include <QPixmap>
+#include <QMenu>
 
 #include "logger.h"
+#include <updatecontroller.h>
+#include <updatebutton.h>
 
 using namespace std; // Indique quel espace de noms on va utiliser
 
@@ -50,11 +53,14 @@ private slots:
     void on_patchButton_clicked();
     void on_restoreButton_clicked();
     void on_gitHubButton_clicked();
+    void on_checkUpdatesButton_clicked();
 
     void exit();
 
 private:
     Ui::MainWindow *ui;
+    QtAutoUpdater::UpdateController *controller;
+    QtAutoUpdater::UpdateButton *button;
 
     QFile kernelFile;
     Logger *logger;
