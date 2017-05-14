@@ -9,7 +9,7 @@
     <TargetDir>/Applications/MBPMid2010-GPU-Fix/</TargetDir>
     <RemoteRepositories>
         <Repository>
-            <Url>http://localhost/repository</Url>
+            <Url>http://julian-poidevin.esy.es/mbpmid2010_gpufix/</Url>
         </Repository>
     </RemoteRepositories>
 </Installer>
