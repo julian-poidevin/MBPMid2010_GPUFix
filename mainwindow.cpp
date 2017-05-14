@@ -154,6 +154,12 @@ bool MainWindow::init()
     //this->ui->labelgithubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
     //this->ui->labelgithubIcon->setOpenExternalLinks(true);
 
+    //Configure version label
+    QString versionNumber = VERSION;
+    QString versionPrefix = "v";
+    QString versionName = versionPrefix + versionNumber;
+    this->ui->versionButton->setText(versionName);
+
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
@@ -801,6 +807,14 @@ QDomElement MainWindow::findElementSibling(QDomElement parent, const QString &te
 void MainWindow::on_gitHubButton_clicked()
 {
     QString link = "https://github.com/julian-poidevin/MBPMid2010_GPUFix";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
+}
+
+void MainWindow::on_versionButton_clicked()
+{
+    QString link = "http://github.com/julian-poidevin/MBPMid2010_GPUFix/blob/master/CHANGELOG.md";
     QDesktopServices::openUrl(QUrl(link));
 
     return;

@@ -50,6 +50,7 @@ private slots:
     void on_patchButton_clicked();
     void on_restoreButton_clicked();
     void on_gitHubButton_clicked();
+    void on_versionButton_clicked();
 
     void exit();
 
