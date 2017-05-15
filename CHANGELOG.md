@@ -1,4 +1,11 @@
 # CHANGELOG
+## 0.4.0 (May 15th, 2017)
+#### Features
+* Added application version to main windows ([#20](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/20))
+
+#### BugFix
+* Removed SIP checking for OS version before El Capitan ([#22](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/22))
+
 ## 0.3.0 (May 6th, 2017)
 #### Features
 * Now scanning for error while patching and avoid loading when patching failed ([#15](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/15))
