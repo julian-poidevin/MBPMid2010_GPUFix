@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define VERSION "0.3.0"
+#define VERSION "0.4.0"
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
