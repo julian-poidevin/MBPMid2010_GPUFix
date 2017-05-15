@@ -32,5 +32,10 @@ If you have any ideas or suggestion please open an [Issue](https://github.com//j
 ## [FAQ](FAQ.md)
 Please see [FAQ.md](FAQ.md)
 
+## Disclaimer
+- SIP must be disabled at all time
+- **The fix will not work when using external screen**
+- GPU performance will be lowered a bit
+
 ## Credits
 - User [fabioroberto](https://forums.macrumors.com/members/fabioroberto.797465/) from [MacRumors forums](https://forums.macrumors.com) for helping me tweaking the application and his kindness
