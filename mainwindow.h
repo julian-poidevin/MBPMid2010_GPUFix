@@ -26,6 +26,7 @@
 #include <QInputDialog>
 #include <QLabel>
 #include <QPixmap>
+#include <QSysInfo>
 
 #include "logger.h"
 
