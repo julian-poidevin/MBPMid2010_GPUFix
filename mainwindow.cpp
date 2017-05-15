@@ -154,6 +154,12 @@ bool MainWindow::init()
     //this->ui->labelgithubIcon->setTextInteractionFlags(Qt::TextBrowserInteraction);
     //this->ui->labelgithubIcon->setOpenExternalLinks(true);
 
+    //Configure version label
+    QString versionNumber = VERSION;
+    QString versionPrefix = "v";
+    QString versionName = versionPrefix + versionNumber;
+    this->ui->versionButton->setText(versionName);
+
     //Search for compatibility
     if(isCompatibleVersion(getMBPModelVersion()))
     {
@@ -224,20 +230,30 @@ bool MainWindow::isSIPEnabled(void)
 {
     QString SIPStatus;
     QProcess process;
+    QSysInfo::MacVersion macVersion = QSysInfo::MacintoshVersion;
 
     logger->write(" | Checking SIP Status\n");
 
-    //Execute commande line
-    process.start("csrutil status");
+    //SIP as been introduced since El Capitan
+    if(macVersion >= QSysInfo::MV_ELCAPITAN)
+    {
+        //Execute commande line
+        process.start("csrutil status");
 
-    //Wait forever until finished
-    process.waitForFinished(-1);
+        //Wait forever until finished
+        process.waitForFinished(-1);
 
-    //Get command line output
-    SIPStatus = process.readAllStandardOutput();
+        //Get command line output
+        SIPStatus = process.readAllStandardOutput();
 
-    //Close process
-    process.close();
+        //Close process
+        process.close();
+    }
+    else
+    {
+        logger->write("No SIP for this OS\n");
+        return false;
+    }
 
 #ifndef WINDOWS
     if(SIPStatus.contains("disable"))
@@ -639,7 +655,7 @@ bool MainWindow::patchKernelExtensionFile(QFile *kernelFile)
             }
             else
             {
-                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found \n";
+                qDebug() << "RemoveSiblingLabel - " << confTree.at(i).nodeName << "Not found";
                 logger->write(" - RemoveSiblingLabel - " + confTree.at(i).nodeName +  " Not found \n");
             }
 
@@ -801,6 +817,14 @@ QDomElement MainWindow::findElementSibling(QDomElement parent, const QString &te
 void MainWindow::on_gitHubButton_clicked()
 {
     QString link = "https://github.com/julian-poidevin/MBPMid2010_GPUFix";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
+}
+
+void MainWindow::on_versionButton_clicked()
+{
+    QString link = "http://github.com/julian-poidevin/MBPMid2010_GPUFix/blob/master/CHANGELOG.md";
     QDesktopServices::openUrl(QUrl(link));
 
     return;
