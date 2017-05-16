@@ -829,3 +829,11 @@ void MainWindow::on_versionButton_clicked()
 
     return;
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString link = "https://www.tipeee.com/MBPMid2010_GPUFix";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
+}
