@@ -50,7 +50,12 @@ Also, if you activated updates on your Macbook, the patched file will be overwri
 
 
 #### Q: Where can I find help?
+You can [open an issue](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/new), contact me on [twitter](https://twitter.com/ju_vallejo) or post a message in [MacRumors forum application thread](https://forums.macrumors.com/threads/mbpmid2010_gpufix-finally-a-fix-for-kernel-panic-of-macbook-pro-2010.2044304/).
 
 ## Troubleshooting
 
-#### Q: 
+#### Q: The app is asking for a password, what is this password ?
+This is your **session password**, the one you use to log in.
+
+#### Q: The fix does not work when an external screen is plugged
+As said in Disclaimer section of the project, the fix will not work when using external screen. In this particular mode GPU internal firmware has more privilege than the kernel extension file : it's kinda overriding the fix. [Hardware fix](https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/#post-23312990) is necessary if you want to use external screen.
