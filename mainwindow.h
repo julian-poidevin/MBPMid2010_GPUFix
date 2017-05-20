@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define VERSION "0.4.0"
+#define VERSION "0.5.0"
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
@@ -52,6 +52,7 @@ private slots:
     void on_restoreButton_clicked();
     void on_gitHubButton_clicked();
     void on_versionButton_clicked();
+    void on_pushButton_clicked();
 
     void exit();
 

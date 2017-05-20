@@ -33,7 +33,7 @@ void MainWindow::on_patchButton_clicked()
     QString command;
     QInputDialog *passwordDialog;
     passwordDialog = new QInputDialog;
-    QString passwordDialogLabel = "Password :";
+    QString passwordDialogLabel = "Enter User Password :";
     bool isErrorPatching=false;
 
     //Search kext file
@@ -65,7 +65,7 @@ void MainWindow::on_patchButton_clicked()
                 if(errorOutput.contains("try again"))
                 {
                     qDebug() << "Wrong password, try again.\n";
-                    passwordDialogLabel="Wrong password, try again.\nPassword :";
+                    passwordDialogLabel="Wrong password, try again.\nEnter User Password :";
                 }
 #else
                 ok = 1;
@@ -825,6 +825,14 @@ void MainWindow::on_gitHubButton_clicked()
 void MainWindow::on_versionButton_clicked()
 {
     QString link = "http://github.com/julian-poidevin/MBPMid2010_GPUFix/blob/master/CHANGELOG.md";
+    QDesktopServices::openUrl(QUrl(link));
+
+    return;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString link = "https://www.tipeee.com/MBPMid2010_GPUFix";
     QDesktopServices::openUrl(QUrl(link));
 
     return;

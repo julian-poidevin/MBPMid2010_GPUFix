@@ -1,2 +1,2 @@
 qt-deploy -v VERSION --deploy ressource/MBPMid2010-GPU-Fix-client_mac.ini
-sudo qt-release -v VERSION -t VERSION ./ressource/MBPMid2010-GPU-Fix-client_mac.ini
+sudo qt-release -v VERSION -t vVERSION ./ressource/MBPMid2010-GPU-Fix-client_mac.ini
