@@ -1,4 +1,11 @@
 # CHANGELOG
+## 0.5.0 (May 21st, 2017)
+#### Features
+* Added donation button ([#17](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/17))
+
+#### Notes
+* Clarified password dialog label
+
 ## 0.4.0 (May 15th, 2017)
 #### Features
 * Added application version to main windows ([#20](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/20))
