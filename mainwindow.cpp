@@ -33,7 +33,7 @@ void MainWindow::on_patchButton_clicked()
     QString command;
     QInputDialog *passwordDialog;
     passwordDialog = new QInputDialog;
-    QString passwordDialogLabel = "Password :";
+    QString passwordDialogLabel = "Enter User Password :";
     bool isErrorPatching=false;
 
     //Search kext file
@@ -65,7 +65,7 @@ void MainWindow::on_patchButton_clicked()
                 if(errorOutput.contains("try again"))
                 {
                     qDebug() << "Wrong password, try again.\n";
-                    passwordDialogLabel="Wrong password, try again.\nPassword :";
+                    passwordDialogLabel="Wrong password, try again.\nEnter User Password :";
                 }
 #else
                 ok = 1;
