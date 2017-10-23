@@ -32,6 +32,9 @@ If you have any ideas or suggestion please open an [Issue](https://github.com//j
 ## [FAQ](FAQ.md)
 Please see [FAQ.md](FAQ.md)
 
+## Backers
+Thanks to all my tippers ! The full list is available here : [Backers.md](Backers.md)
+
 ## Disclaimer
 - SIP must be disabled at all time
 - **The fix will not work when using external screen**
