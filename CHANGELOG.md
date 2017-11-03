@@ -1,4 +1,11 @@
 # CHANGELOG
+## 0.6.0 (November 3rd, 2017)
+#### BugFix
+* Disabled kext signing verification ([#39](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/39))
+
+#### Notes
+* Added macOS version to logger ([#40](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/40))
+
 ## 0.5.0 (May 21st, 2017)
 #### Features
 * Added donation button ([#17](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/17))

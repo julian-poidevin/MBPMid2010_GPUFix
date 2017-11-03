@@ -79,6 +79,8 @@ void MainWindow::on_patchButton_clicked()
             }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
+            //Disable signing extension verification
+            disableKextSigning();
             isErrorPatching = patchKernelExtensionFile(&kernelFile);
 #ifndef TEST
             if(isErrorPatching == false)
@@ -93,7 +95,7 @@ void MainWindow::on_patchButton_clicked()
         }
         else
         {
-            logger->write(" ********** Discarded MBP GPU Fix **********n");
+            logger->write(" ********** Discarded MBP GPU Fix **********\n");
             return;
         }
     }
@@ -230,12 +232,15 @@ bool MainWindow::isSIPEnabled(void)
 {
     QString SIPStatus;
     QProcess process;
-    QSysInfo::MacVersion macVersion = QSysInfo::MacintoshVersion;
+    QOperatingSystemVersion macVersion = QOperatingSystemVersion::current();
+
+    logger->write(" | macOS version : \n");
+    logger->write(macVersion.name() + " " + QString::number(macVersion.majorVersion()) + "." +  QString::number(macVersion.minorVersion()) + "\n");
 
     logger->write(" | Checking SIP Status\n");
 
     //SIP as been introduced since El Capitan
-    if(macVersion >= QSysInfo::MV_ELCAPITAN)
+    if(macVersion >= QOperatingSystemVersion::OSXElCapitan)
     {
         //Execute commande line
         process.start("csrutil status");
@@ -269,6 +274,18 @@ bool MainWindow::isSIPEnabled(void)
 #else
     return false;
 #endif
+}
+
+int MainWindow::disableKextSigning()
+{
+    QProcess process;
+    QString command;
+    QStringList arguments;
+
+    logger->write("Disabling Kext Signing verification : ");
+    command = "sudo nvram boot-args=kext-dev-mode=1";
+    arguments.clear();
+    return executeProcess(&process,command,arguments);
 }
 
 int MainWindow::executeProcess(QProcess* process, QString command, QStringList arguments)

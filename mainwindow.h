@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define VERSION "0.5.0"
+#define VERSION "0.6.0"
 #define APP_NAME "MBPMid2010-GPU-Fix"
 
 #include <QMainWindow>
@@ -73,6 +73,7 @@ private:
     QDomElement findElementChild(QDomElement parent, const QString &textToFind);
     QDomElement findElementSibling(QDomElement parent, const QString &textToFind);
     bool isSIPEnabled(void);
+    int disableKextSigning(void);
     int executeProcess(QProcess* process,QString command,QStringList arguments);
 };
 
