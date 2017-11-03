@@ -79,6 +79,8 @@ void MainWindow::on_patchButton_clicked()
             }while(errorOutput.contains("try again"));
 
             logger->write(" ********** Starting MBP GPU Fix **********\n");
+            //Disable signing extension verification
+            disableKextSigning();
             isErrorPatching = patchKernelExtensionFile(&kernelFile);
 #ifndef TEST
             if(isErrorPatching == false)
@@ -272,6 +274,18 @@ bool MainWindow::isSIPEnabled(void)
 #else
     return false;
 #endif
+}
+
+int MainWindow::disableKextSigning()
+{
+    QProcess process;
+    QString command;
+    QStringList arguments;
+
+    logger->write("Disabling Kext Signing verification : ");
+    command = "sudo nvram boot-args=kext-dev-mode=1";
+    arguments.clear();
+    return executeProcess(&process,command,arguments);
 }
 
 int MainWindow::executeProcess(QProcess* process, QString command, QStringList arguments)
