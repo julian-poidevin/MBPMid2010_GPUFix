@@ -7,6 +7,7 @@ Thanks to all my tipers !
 | Greg | 12€ |
 | Stefania | 20€ |
 | Balázs | 10€ |
+| Eric | 10€ |
 
 
 
