@@ -58,4 +58,4 @@ You can [open an issue](https://github.com/julian-poidevin/MBPMid2010_GPUFix/iss
 This is your **session password**, the one you use to log in.
 
 #### Q: The fix does not work when an external screen is plugged
-As said in Disclaimer section of the project, the fix will not work when using external screen. In this particular mode GPU internal firmware has more privilege than the kernel extension file : it's kinda overriding the fix. [Hardware fix](https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/#post-23312990) is necessary if you want to use external screen.
+As said in Disclaimer section of the project, the fix will not work when using external screen. In this particular mode GPU internal firmware has more privilege than the kernel extension file : it's kinda overriding the fix. [Hardware fix](https://forums.macrumors.com/threads/gpu-kernel-panic-in-mid-2010-whats-the-best-fix.1890097/#post-23312990) is necessary if you want to use external screen. You can also check this video if you want to fix the board : https://www.youtube.com/watch?v=DzcgT_fiVTA
