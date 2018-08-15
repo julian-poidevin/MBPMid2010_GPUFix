@@ -1,4 +1,8 @@
 # CHANGELOG
+## 0.6.1 (August 15th, 2018)
+#### Features
+* Changed donation method to PayPal ([#82](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/82))
+
 ## 0.6.0 (November 3rd, 2017)
 #### BugFix
 * Disabled kext signing verification ([#39](https://github.com/julian-poidevin/MBPMid2010_GPUFix/issues/39))

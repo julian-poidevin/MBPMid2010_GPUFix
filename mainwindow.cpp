@@ -759,18 +759,8 @@ int MainWindow::loadKernelExtension(QFile *kernelFile)
     //Execute commande line
     processStatus |= executeProcess(&process,command,arguments);
 
-    //logger->write("Unloading previous kext : ");
-    /*** Unload previous kext file ***/
-    //TODO find a way to execute process as root
-    //command = "sudo -S kextunload -v /System/Library/Extensions/AppleGraphicsPowerManagement.kext";
-    //arguments.clear();
-    //arguments << "-v" << "/System/Library/Extensions/AppleGraphicsPowerManagement.kext";
-    //Execute commande line
-    //processStatus |= executeProcess(&process,command,arguments);
-
     logger->write("Loading modified kext : ");
     /*** Finally load kext file ***/
-    //TODO find a way to execute process as root
     command = "sudo -S kextload -v /tmp/AppleGraphicsPowerManagement.kext";
     arguments.clear();
     //Execute commande line
@@ -849,7 +839,7 @@ void MainWindow::on_versionButton_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    QString link = "https://www.tipeee.com/MBPMid2010_GPUFix";
+    QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VR3QQDC6GMDCQ";
     QDesktopServices::openUrl(QUrl(link));
 
     return;
