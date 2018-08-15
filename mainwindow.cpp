@@ -839,7 +839,7 @@ void MainWindow::on_versionButton_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    QString link = "https://www.tipeee.com/MBPMid2010_GPUFix";
+    QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VR3QQDC6GMDCQ";
     QDesktopServices::openUrl(QUrl(link));
 
     return;
