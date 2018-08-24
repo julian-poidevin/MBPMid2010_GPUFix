@@ -21,6 +21,9 @@ The utility is based on Qt Framework and only available on OSX.
 - Patch of `AppleGraphicsPowerManagement.kext` file
 - *Coming soon* : Restore of backuped file 
 
+## Compatibility
+The app is compatible with macOS `10.10`, `10.11` and `10.12`
+
 ## Downloads
 Latest version can be downloaded here : [![Downloads](https://img.shields.io/github/downloads/julian-poidevin/MBPMid2010_GPUFix/latest/total.svg)](https://github.com/julian-poidevin/MBPMid2010_GPUFix/releases/latest)
 
@@ -32,7 +35,9 @@ If you have any ideas or suggestion please open an [Issue](https://github.com//j
 ## [FAQ](FAQ.md)
 Please see [FAQ.md](FAQ.md)
 
-## Backers
+## Donations
+You can donate for my work via Paypal : [HERE](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VR3QQDC6GMDCQ)
+
 Thanks to all my tippers ! The full list is available here : [Backers.md](Backers.md)
 
 ## Disclaimer
