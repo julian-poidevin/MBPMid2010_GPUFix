@@ -22,7 +22,7 @@ The utility is based on Qt Framework and only available on OSX.
 - *Coming soon* : Restore of backuped file 
 
 ## Compatibility
-The app is compatible with macOS `10.10`, `10.11` and `10.12`
+The app is compatible with macOS `10.10`, `10.11`, `10.12`, `10.13`and `10.14`
 
 ## Downloads
 Latest version can be downloaded here : [![Downloads](https://img.shields.io/github/downloads/julian-poidevin/MBPMid2010_GPUFix/latest/total.svg)](https://github.com/julian-poidevin/MBPMid2010_GPUFix/releases/latest)
