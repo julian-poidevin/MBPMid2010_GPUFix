@@ -81,6 +81,14 @@ void MainWindow::on_patchButton_clicked()
             logger->write(" ********** Starting MBP GPU Fix **********\n");
             //Disable signing extension verification
             disableKextSigning();
+            
+            //Mount system with write permission
+            if(!mountSystemWritePermission())
+            {
+                logger->write("********************* MBP GPU Fix FAILED *********************\n");
+                return;
+            }
+
             isErrorPatching = patchKernelExtensionFile(&kernelFile);
 #ifndef TEST
             if(isErrorPatching == false)
@@ -286,6 +294,23 @@ int MainWindow::disableKextSigning()
     command = "sudo nvram boot-args=kext-dev-mode=1";
     arguments.clear();
     return executeProcess(&process,command,arguments);
+}
+
+int MainWindow::mountSystemWritePermission()
+{
+    QProcess process;
+    QString command;
+    QStringList arguments;
+    QOperatingSystemVersion macVersion = QOperatingSystemVersion::current();
+
+    //This operation is only needed for MacOS version >= 10.15
+    if(macVersion >= QOperatingSystemVersion::MacOSCatalina)
+    {
+        logger->write("Mounting system with write permissions : ");
+        command = "sudo mount -uw /";
+        arguments.clear();
+        return executeProcess(&process,command,arguments);
+    }
 }
 
 int MainWindow::executeProcess(QProcess* process, QString command, QStringList arguments)
