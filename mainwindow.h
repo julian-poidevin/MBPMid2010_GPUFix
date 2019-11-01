@@ -74,6 +74,7 @@ private:
     QDomElement findElementSibling(QDomElement parent, const QString &textToFind);
     bool isSIPEnabled(void);
     int disableKextSigning(void);
+    int mountSystemWritePermission(void);
     int executeProcess(QProcess* process,QString command,QStringList arguments);
 };
 
